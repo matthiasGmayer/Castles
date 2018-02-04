@@ -10,24 +10,27 @@ namespace Castles
 {
     class Terrain
     {
-        public static Texture grassTexture = Loader.LoadTexture("!Grass.jpg");
         public static Texture stoneTexture = Loader.LoadTexture("!Stone.jpg");
+        public static Texture grassTexture = Loader.LoadTexture("!Grass.jpg");
         public static Dictionary<(int X, int Z), Terrain> terrainMap = new Dictionary<(int, int), Terrain>();
         public (int X, int Z) Position { get; }
         public VAO Vao { get; }
         public static int length = 100;
         public static int spacing = 10;
         public static ShaderProgram terrainShader = Shaders.GetShader("Terrain");
+        public static int Width { get { return length * spacing; } }
+        
 
         static Terrain()
         {
             //terrainShader["grassTex"].SetValue(0);
             //terrainShader["stoneTex"].SetValue(1);
+            //stoneTexture = Loader.LoadTexture("!Stone.jpg");
+            //grassTexture = Loader.LoadTexture("!Grass.jpg");
             Gl.Uniform1i(Gl.GetUniformLocation(terrainShader.ProgramID, "grassTex"), 0);
             Gl.Uniform1i(Gl.GetUniformLocation(terrainShader.ProgramID, "stoneTex"), 1);
         }
 
-        public static int Width { get { return length * spacing; } }
 
         public Terrain(int _x, int _y)
         {
@@ -143,7 +146,6 @@ namespace Castles
         {
             if (!terrainMap.ContainsKey((x, y)))
             {
-                Console.WriteLine("new");
                 new Terrain(x, y);
             }
             return terrainMap[(x, y)];
@@ -157,6 +159,7 @@ namespace Castles
             Gl.BindTexture(stoneTexture);
             Vao.Program["transformation_matrix"]?.SetValue(Matrix4.CreateTranslation(new Vector3(Position.X * spacing * length, 0, Position.Z * spacing * length)));
             Vao.Draw();
+            Gl.ActiveTexture(0);
         }
 
         public static void Dispose()

@@ -41,9 +41,11 @@ namespace Castles
         
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            base.OnRenderFrame(e);
+            Gl.Viewport(0, 0, Width, Height);
+            Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             game.Render();
             SwapBuffers();
-            base.OnRenderFrame(e);
         }
 
 
@@ -56,9 +58,6 @@ namespace Castles
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
-            Gl.Viewport(0, 0, Width, Height);
-            Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            game.Render();
             game.Update((float)e.Time);
         }
 

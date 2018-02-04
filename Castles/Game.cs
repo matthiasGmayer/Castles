@@ -24,22 +24,25 @@ namespace Castles
             //Create(new DirectionalLight(new Vector3(-1, 0, 1), new Vector3(1, 1, 1)));
             //d = Create(new Entity(Loader.LoadModel("!KnightSword", (Texture)null, entityShader), new Vector3(0,5,0), new Vector3(0, 0, 1.6f), 1f));
             //Create(new Entity(Loader.LoadModel("!Triangle", (Texture)null, entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
-            player = Create(new Entity(Loader.LoadModel("!Dragon", (Texture)null, entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
+            player = Create(new Entity(Loader.LoadModel("!KnightSword", (Texture)null, entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
             //d = Create(new Entity(Loader.LoadModel("!KnightSword", (Texture)null, entityShader), new Vector3(0, 5, 0), new Vector3(1.6f, 0, 0.5f), 3));
+
+            Console.WriteLine("player loaded");
             c = Create(new EntityCamera(player));
             player.Position = new Vector3(100, 100, 100);
             c.Offset = new Vector3(0, 5, 0);
             c.Position = new Vector3(0, 5, 20);
 
             Create(new Terrain(0, 0));
-            //Create(new Terrain(0, 1));
-            //Create(new Terrain(0, -1));
-            //Create(new Terrain(1, 0));
-            //Create(new Terrain(1, 1));
-            //Create(new Terrain(1, -1));
-            //Create(new Terrain(-1, 0));
-            //Create(new Terrain(-1, 1));
-            //Create(new Terrain(-1, -1));
+            Create(new Terrain(0, 1));
+            Create(new Terrain(0, -1));
+            Create(new Terrain(1, 0));
+            Create(new Terrain(1, 1));
+            Create(new Terrain(1, -1));
+            Create(new Terrain(-1, 0));
+            Create(new Terrain(-1, 1));
+            Create(new Terrain(-1, -1));
+            Console.WriteLine("terrain loaded");
         }
         public void Update(float delta)
         {
@@ -95,7 +98,7 @@ namespace Castles
             if (!tile.Equals(lastTile))
             {
                 Console.WriteLine("HALLO");
-                Terras(tx, ty);
+                //Terras(tx, ty);
                 //Create(Terrain.GetTerrain(tx, tz));
                 //Create(Terrain.GetTerrain(tx + 1, tz - 1));
                 //Create(Terrain.GetTerrain(tx + 1, tz));
@@ -125,6 +128,7 @@ namespace Castles
         Dictionary<Model, List<IRenderable>> entityMap = new Dictionary<Model, List<IRenderable>>();
         public void Render()
         {
+
             foreach (ShaderProgram shader in Shaders.GetShaders())
             {
                 c.SetView(shader);
@@ -160,6 +164,7 @@ namespace Castles
 
                 Gl.BindVertexArray(0);
             }
+
         }
 
 

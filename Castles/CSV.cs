@@ -24,7 +24,7 @@ namespace Castles
         public CSV(string path)
         {
             Path = path;
-            if (File.Exists(Path))            
+            if (File.Exists(Path))         
                 Read();
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.IO;
+using ImageSharp;
 
 namespace Castles
 {
@@ -23,10 +24,15 @@ namespace Castles
             file = file.Replace("!", defaultTex);
 
             string name = Path.GetFileNameWithoutExtension(file);
+            Texture t;
             if (!textureMap.ContainsKey(name))
+            {
+                textureMap.Add(name, t = new Texture(file));
+            }
+            else
+                t = textureMap[name];
 
-                textureMap.Add(name, new Texture(file));
-            Texture t = textureMap[name];
+
 
             Gl.BindTexture(t);
             Gl.GenerateMipmap(GenerateMipmapTarget.Texture2D);
@@ -39,9 +45,10 @@ namespace Castles
                     Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)
                     )
                     );
-
             return t;
         }
+
+
         public static void Dispose()
         {
             foreach(var r in textureMap)
@@ -55,7 +62,6 @@ namespace Castles
         }
         public static Model LoadModel(string obj, Texture tex, ShaderProgram program)
         {
-
 
             if (!Path.HasExtension(obj))
                 obj = obj + ".obj";

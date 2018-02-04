@@ -17,7 +17,8 @@ uniform sampler2D tex;
 
 void main(void){
 
-	vec4 color = texture(tex, uv * 50);
+	//vec4 color = texture(tex, uv * 50);
+	vec4 color = vec4(1);
 
 	vec3 finalDiffuse = vec3(0);
 	vec3 finalSpecular = vec3(0);
