@@ -8,9 +8,9 @@ using System.Numerics;
 
 namespace Castles
 {
-    public class Entity : IDisposable
+    public class Entity : IDisposable, IRenderable, ITransformable
     {
-        private Model model;
+        public Model Model { get; }
 
         public Vector3 Rotation { get; set; }
         public float Scale { get; set; }
@@ -24,19 +24,19 @@ namespace Castles
             Rotation = rotation;
             Scale = scale;
             Parent = parent;
-            this.model = model;
+            Model = model;
         }
 
         public Entity(Model model, Vector3 position, Vector3 rotation, float scale) : this(model, position, rotation, scale, null) { }
 
         public virtual void Render()
         {
-            model.Program.Use();
-            model.Program["transformation_matrix"].SetValue(GetTransformationMatrix());
-            model.Render();
+            Model.Program.Use();
+            Model.Program["transformation_matrix"].SetValue(GetTransformationMatrix());
+            Model.Render();
         }
 
-        protected virtual Matrix4 GetTransformationMatrix()
+        public virtual Matrix4 GetTransformationMatrix()
         {
 
             Matrix4 transformation = Matrix4.CreateScaling(new Vector3(Scale, Scale, Scale)) *
@@ -51,7 +51,7 @@ namespace Castles
 
         public void Dispose()
         {
-            model.Dispose();   
+            Model.Dispose();   
         }
     }
 }

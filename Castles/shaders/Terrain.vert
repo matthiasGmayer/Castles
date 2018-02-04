@@ -22,7 +22,6 @@ void main(void){
 	uv = in_uv;
 
 	vec4 worldPosition = transformation_matrix * vec4(in_position, 1);
-
 	normal = vec3((transformation_matrix * vec4(in_normal,0)).xyz);
 	for(int i = 0; i < pointLightNumber + dirLightNumber && i < MAXLIGHTS; i++){
 	

@@ -132,22 +132,27 @@
     <Compile Include="Light.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Model.cs" />
-    <Compile Include="Perlin.cs" />
+    <Compile Include="Noise.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shaders.cs" />
     <Compile Include="SimpleInterfaces.cs" />
     <Compile Include="Terrain.cs" />
+    <Compile Include="Tools.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="OpenGL.dll.config" />
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
+    <None Include="Resources\Models\Chair.obj" />
     <None Include="Resources\Models\Cube.obj" />
     <None Include="Resources\Models\Dragon.obj" />
     <None Include="Resources\Models\KnightSword.obj" />
     <None Include="Resources\Models\Triangle.obj" />
+    <None Include="Resources\Specs\Chair.csv" />
     <None Include="Resources\Textures\Dragon.csv" />
+    <None Include="shaders\Terrain.vert" />
+    <None Include="shaders\Terrain.frag" />
     <None Include="shaders\Entity.frag" />
     <None Include="shaders\Entity.vert" />
   </ItemGroup>

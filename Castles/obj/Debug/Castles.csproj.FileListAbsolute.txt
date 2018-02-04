@@ -33,6 +33,5 @@ C:\Users\Matthias\Desktop\Informatik\C#\Castles\Castles\bin\Debug\System.Numeric
 C:\Users\Matthias\Desktop\Informatik\C#\Castles\Castles\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 C:\Users\Matthias\Desktop\Informatik\C#\Castles\Castles\obj\Debug\Castles.exe
 C:\Users\Matthias\Desktop\Informatik\C#\Castles\Castles\obj\Debug\Castles.pdb
-C:\Users\Matthias\Desktop\Informatik\C#\Castles\Castles\obj\Debug\Castles.csprojResolveAssemblyReference.cache
 C:\Users\Matthias\Desktop\Informatik\C#\Castles\Castles\bin\Debug\System.ValueTuple.dll
 C:\Users\Matthias\Desktop\Informatik\C#\Castles\Castles\bin\Debug\System.ValueTuple.xml

@@ -13,8 +13,46 @@ namespace Castles
         public static readonly string defaultTex = "../../Resources/Textures/";
         public static readonly string defaultSpec = "../../Resources/Specs/";
 
-        public static Dictionary<string, Model> modelMap = new Dictionary<string, Model>();
 
+        public static Dictionary<string, Model> modelMap = new Dictionary<string, Model>();
+        public static Dictionary<string, Texture> textureMap = new Dictionary<string, Texture>();
+        public static Texture LoadTexture(string file)
+        {
+            if (!Path.HasExtension(file))
+                file = file + ".png";
+            file = file.Replace("!", defaultTex);
+
+            string name = Path.GetFileNameWithoutExtension(file);
+            if (!textureMap.ContainsKey(name))
+
+                textureMap.Add(name, new Texture(file));
+            Texture t = textureMap[name];
+
+            Gl.BindTexture(t);
+            Gl.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            Gl.TexParameteri(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, TextureParameter.LinearMipMapLinear);
+            Gl.TexParameterf(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, 0);
+
+            if (Gl.IsExtensionSupported(Extension.GL_EXT_texture_filter_anisotropic))
+                Gl.TexParameterf(TextureTarget.Texture2D, TextureParameterName.MaxAnisotropyExt,
+                    Math.Min(4f,
+                    Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)
+                    )
+                    );
+
+            return t;
+        }
+        public static void Dispose()
+        {
+            foreach(var r in textureMap)
+            {
+                r.Value.Dispose();
+            }
+            foreach(var r in modelMap)
+            {
+                r.Value.Dispose();
+            }
+        }
         public static Model LoadModel(string obj, Texture tex, ShaderProgram program)
         {
 
@@ -22,8 +60,9 @@ namespace Castles
             if (!Path.HasExtension(obj))
                 obj = obj + ".obj";
             obj = obj.Replace("!", defaultObj);
-            if (modelMap.ContainsKey(obj))
-                return modelMap[obj];
+            string name = Path.GetFileNameWithoutExtension(obj);
+            if (modelMap.ContainsKey(name))
+                return modelMap[name];
 
             VAO vao;
             VBO<Vector3> vertices;
@@ -101,10 +140,9 @@ namespace Castles
             else
                 vao = new VAO(program, vertices, normals, elements);
             Model m = new Model(vao, tex);
-            modelMap.Add(obj, m);
+            modelMap.Add(name, m);
 
             //specs
-
             CSV specs = new CSV(defaultSpec + Path.GetFileNameWithoutExtension(obj));
             if (specs.Any())
             {
@@ -125,7 +163,7 @@ namespace Castles
             if (!Path.HasExtension(tex))
                 tex = tex + ".png";
             tex = tex.Replace("!", defaultTex);
-            return LoadModel(obj, new Texture(tex), program);
+            return LoadModel(obj, LoadTexture(tex), program);
         }
         public static Model LoadModel(string name, ShaderProgram program)
         {

@@ -25,25 +25,27 @@ namespace Castles
         protected override void OnLoad(EventArgs e)
         {
 
-            //VSync = VSyncMode.Off;
-
+            VSync = VSyncMode.Off;
+            CursorVisible = false;
             Gl.Enable(EnableCap.Multisample);
             Gl.Enable(EnableCap.DepthTest);
             Gl.Enable(EnableCap.CullFace);
             Gl.Enable(EnableCap.Blend);
+            Gl.CullFace(CullFaceMode.Back);
             Gl.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            if (Gl.IsExtensionSupported(Extension.GL_EXT_texture_filter_anisotropic))
-                Gl.TexParameterf(TextureTarget.Texture2D, TextureParameterName.MaxAnisotropyExt, Math.Min(4f, Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)));
+           
+            Console.WriteLine(Math.Min(4f, Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)));
             game = new Game();
             game.SetProjection(Width, Height);
         }
         
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            base.OnRenderFrame(e);
             game.Render();
             SwapBuffers();
+            base.OnRenderFrame(e);
         }
+
 
         protected override void OnClosed(EventArgs e) => Dispose();
         protected override void OnWindowBorderChanged(EventArgs e) => game.SetProjection(Width, Height);

@@ -9,6 +9,6 @@ namespace Castles
 {
     public static class VectorExtensions
     {
-        public static float[] ToFloat(this Vector3 v) => new float[] { v.X, v.Y, v.Z };
+        public static float[] ToFloat(this Vector3 v) => new float[] { v.X, v.Y, v.Z };        
     }
 }

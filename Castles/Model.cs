@@ -9,17 +9,17 @@ namespace Castles
         public float Reflectivity { get; set; }
         public float ShineDamper { get; set; }
 
-        private VAO vao;
+        public VAO Vao { get; }
         private Texture texture;
 
-        public ShaderProgram Program { get { return vao.Program; } }
+        public ShaderProgram Program { get { return Vao.Program; } }
 
         public Model(VAO vao, Texture texture)
         {
-            this.vao = vao;
+            this.Vao = vao;
             this.texture = texture;
-            Reflectivity = 0.1f;
-            ShineDamper = 10f;
+            Reflectivity = 1f;
+            ShineDamper = 100f;
         }
 
 
@@ -28,17 +28,20 @@ namespace Castles
         {
             Program["reflectivity"].SetValue(Reflectivity);
             Program["shineDamper"].SetValue(ShineDamper);
-
             if (texture != null)
                 Gl.BindTexture(texture);
-            vao.Draw();
+            Vao.Draw();
+        }
+
+        public void Bind()
+        {
+            Gl.BindVertexArray(Vao.ID);
         }
 
         internal void Dispose()
         {
-            vao.DisposeChildren = true;
-            vao.Dispose();
-            texture?.Dispose();            
+            Vao.DisposeChildren = true;
+            Vao.Dispose();
         }
     }
 }
