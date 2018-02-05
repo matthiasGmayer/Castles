@@ -17,14 +17,12 @@ namespace Castles
 
         public Game()
         {
-            Console.WriteLine(entityShader.ProgramLog);
-
             Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
             //Create(new PointLight(new Vector3(0, 0, 0), new Vector3(1f, 0.5f, 0.5f)));
             //Create(new DirectionalLight(new Vector3(-1, 0, 1), new Vector3(1, 1, 1)));
             //d = Create(new Entity(Loader.LoadModel("!KnightSword", (Texture)null, entityShader), new Vector3(0,5,0), new Vector3(0, 0, 1.6f), 1f));
             //Create(new Entity(Loader.LoadModel("!Triangle", (Texture)null, entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
-            player = Create(new Entity(Loader.LoadModel("!KnightSword", (Texture)null, entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
+            player = Create(new Entity(Loader.LoadModel("!Chair", entityShader), new Vector3(), new Vector3(0, 0, 0), 10f));
             //d = Create(new Entity(Loader.LoadModel("!KnightSword", (Texture)null, entityShader), new Vector3(0, 5, 0), new Vector3(1.6f, 0, 0.5f), 3));
 
             Console.WriteLine("player loaded");
@@ -50,7 +48,7 @@ namespace Castles
             ManageTerrain();
 
             float speed = delta * 500f;
-            player.Position = new Vector3(player.Position.X, Terrain.GetHeight(player.Position.X, player.Position.Z), player.Position.Z);
+            player.Position = new Vector3(player.Position.X, Terrain.GetHeight(player.Position.X, player.Position.Z)+30, player.Position.Z);
             Vector3 v = new Vector3();
 
             if (Actions.IsPressed(OpenTK.Input.Key.S))
@@ -144,20 +142,19 @@ namespace Castles
 
             foreach (var r in entityMap)
             {
+
                 r.Key.Bind();
+
                 r.Key.Vao.BindAttributes(r.Key.Program);
                 foreach (IRenderable rend in r.Value)
                 {
-
                     r.Key.Program.Use();
                     if (rend is ITransformable t)
                         r.Key.Program["transformation_matrix"]?.SetValue(t.GetTransformationMatrix());
                     else
                         r.Key.Program["transformation_matrix"]?.SetValue(Matrix4.Identity);
-
                     r.Key.Program["reflectivity"]?.SetValue(r.Key.Reflectivity);
                     r.Key.Program["shineDamper"]?.SetValue(r.Key.ShineDamper);
-
                     Gl.DrawElements(BeginMode.Triangles, r.Key.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
                     Gl.UseProgram(0);
                 }

@@ -35,6 +35,11 @@ namespace Castles
 
         public void Bind()
         {
+            if (texture != null)
+                Gl.BindTexture(texture);
+            else
+                Gl.BindTexture(TextureTarget.Texture2D,0);
+
             Gl.BindVertexArray(Vao.ID);
         }
 

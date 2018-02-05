@@ -187,7 +187,10 @@ namespace Castles
                 float total = 0;
 
                 total += GetInterpolatedNoise(x / 128f, z / 128f);
-                total += GetInterpolatedNoise(x / 8f, z / 8f) / 128f;
+                total += GetInterpolatedNoise(x / 8f, z / 8f) / 64f;
+                total += GetInterpolatedNoise(x, z ) / 128f;
+                total += GetInterpolatedNoise(x / 16f, z / 16f) / 64f;
+                //total += (float)Math.Pow(GetInterpolatedNoise(x / 1280f, z / 1280)+1, 9f) * GetInterpolatedNoise(x/2f,z/2f);
 
                 return total * amplitude;
             }

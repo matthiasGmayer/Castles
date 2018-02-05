@@ -79,13 +79,13 @@ namespace Castles
             targetLook = Entity.Position - ((Entity.Position - targetLook) * new Vector3(factor));
             //Vector3 targetPos = Entity.Position - (Entity.Position - Position).Normalize() * new Vector3(Distance);
             //Position = targetPos - ((targetPos - Position) * new Vector3(factor));
-            Vector3 p = Position;
-            Vector3 t = targetLook;
-            float h = Terrain.GetHeight(p.X, p.Z) + 1f;
-            if(p.Y < h)
-            {
-                Vertical = 0.26f * (float)Math.PI - Tools.GetAngle(new Vector2(0, p.Y), new Vector2((new Vector2(t.X,t.Z)-new Vector2(p.X,p.Z)).Length(), t.Z));
-            }
+            //Vector3 p = Position;
+            //Vector3 t = targetLook;
+            //float h = Terrain.GetHeight(p.X, p.Z) + 1f;
+            //if(p.Y < h)
+            //{
+            //    Vertical = 0.26f * (float)Math.PI - Tools.GetAngle(new Vector2(0, p.Y), new Vector2((new Vector2(t.X,t.Z)-new Vector2(p.X,p.Z)).Length(), t.Z));
+            //}
         }
 
         protected override Matrix4 GetViewMatrix() => Matrix4.LookAt(Position, targetLook + Offset, Vector3.UnitY);
