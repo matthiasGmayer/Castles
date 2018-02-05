@@ -13,4 +13,5 @@ namespace Castles
     public interface IRenderable { Model Model { get;  } }
     public interface ITransformable { Matrix4 GetTransformationMatrix(); }
     public interface IMouseGetter { void OnMouseMoved(Vector2 change); }
+    public interface IScrollGetter { void OnScroll(float change); }
 }

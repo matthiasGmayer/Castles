@@ -186,6 +186,7 @@ namespace Castles
             {
                 float total = 0;
 
+                total += GetInterpolatedNoise(x / 1024f, z / 1024f) * 5;
                 total += GetInterpolatedNoise(x / 128f, z / 128f);
                 total += GetInterpolatedNoise(x / 8f, z / 8f) / 64f;
                 total += GetInterpolatedNoise(x, z ) / 128f;

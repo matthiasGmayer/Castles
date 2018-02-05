@@ -36,14 +36,14 @@ namespace Castles
         }
     }
 
-    class EntityCamera : Camera, IUpdatable, IMouseGetter
+    class EntityCamera : Camera, IUpdatable, IMouseGetter, IScrollGetter
     {
         public Entity Entity { get; set; }
         private Vector3 targetLook;
         public Vector3 Offset { get; set; }
-        private float minDistance;
-        private float distance;
-        public float Distance { get { return Math.Max(minDistance, distance); } set { distance = value; } }
+
+        public float Distance { get; set; }
+        private float targetDistance;
 
         public float Horizontal { get; private set; }
         public float Vertical{ get; private set;}
@@ -77,6 +77,7 @@ namespace Castles
         {
             float factor = (float)Math.Pow(0.1f, delta);
             targetLook = Entity.Position - ((Entity.Position - targetLook) * new Vector3(factor));
+            Distance = targetDistance - ((targetDistance - Distance) * factor);
             //Vector3 targetPos = Entity.Position - (Entity.Position - Position).Normalize() * new Vector3(Distance);
             //Position = targetPos - ((targetPos - Position) * new Vector3(factor));
             //Vector3 p = Position;
@@ -94,6 +95,11 @@ namespace Castles
         {
             Horizontal -= change.X / 1000f;
             Vertical -= change.Y / 1000f;
+        }
+
+        public void OnScroll(float change)
+        {
+            targetDistance += change * 10f;
         }
     }
 }

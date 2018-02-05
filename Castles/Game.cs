@@ -18,14 +18,7 @@ namespace Castles
         public Game()
         {
             Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
-            //Create(new PointLight(new Vector3(0, 0, 0), new Vector3(1f, 0.5f, 0.5f)));
-            //Create(new DirectionalLight(new Vector3(-1, 0, 1), new Vector3(1, 1, 1)));
-            //d = Create(new Entity(Loader.LoadModel("!KnightSword", (Texture)null, entityShader), new Vector3(0,5,0), new Vector3(0, 0, 1.6f), 1f));
-            //Create(new Entity(Loader.LoadModel("!Triangle", (Texture)null, entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
-            player = Create(new Entity(Loader.LoadModel("!Chair", entityShader), new Vector3(), new Vector3(0, 0, 0), 10f));
-            //d = Create(new Entity(Loader.LoadModel("!KnightSword", (Texture)null, entityShader), new Vector3(0, 5, 0), new Vector3(1.6f, 0, 0.5f), 3));
-
-            Console.WriteLine("player loaded");
+            player = Create(new Entity(Loader.LoadModel("!Dragon", (Texture)null, entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
             c = Create(new EntityCamera(player));
             player.Position = new Vector3(100, 100, 100);
             c.Offset = new Vector3(0, 5, 0);
@@ -40,7 +33,6 @@ namespace Castles
             Create(new Terrain(-1, 0));
             Create(new Terrain(-1, 1));
             Create(new Terrain(-1, -1));
-            Console.WriteLine("terrain loaded");
         }
         public void Update(float delta)
         {
