@@ -99,7 +99,7 @@ namespace Castles
                 if (line.StartsWith("vt "))
                 {
                     string[] s = line.Split(' ');
-                    textureList.Add(new Vector2(ToFloat(s[1]), ToFloat(s[2])));
+                    textureList.Add(new Vector2(ToFloat(s[1]), 1 - ToFloat(s[2])));
                 }
             }
 
@@ -114,22 +114,59 @@ namespace Castles
                 if (line.StartsWith("f "))
                 {
                     string[] strings = line.Split(' ');
-                    strings = new string[] { strings[1], strings[2], strings[3] };
 
-                    foreach (string str in strings)
+                    if (strings.Length == 5)
                     {
-                        string[] strs = str.Split('/');
-                        if (int.TryParse(strs[0], out int i1))
+                        foreach (string str in new string[] { strings[1], strings[2], strings[3] })
                         {
-                            elementList.Add(i1 - 1);
+                            string[] strs = str.Split('/');
+                            if (int.TryParse(strs[0], out int i1))
+                            {
+                                elementList.Add(i1 - 1);
+                            }
+                            if (int.TryParse(strs[1], out int i2))
+                            {
+                                textureArray[i1 - 1] = textureList[i2 - 1];
+                            }
+                            if (int.TryParse(strs[2], out int i3))
+                            {
+                                normalsArray[i1 - 1] = normalsList[i3 - 1];
+                            }
                         }
-                        if (int.TryParse(strs[1], out int i2))
+                        foreach (string str in new string[] { strings[1], strings[3], strings[4] })
                         {
-                            textureArray[i1 - 1] = textureList[i2 - 1];
+                            string[] strs = str.Split('/');
+                            if (int.TryParse(strs[0], out int i1))
+                            {
+                                elementList.Add(i1 - 1);
+                            }
+                            if (int.TryParse(strs[1], out int i2))
+                            {
+                                textureArray[i1 - 1] = textureList[i2 - 1];
+                            }
+                            if (int.TryParse(strs[2], out int i3))
+                            {
+                                normalsArray[i1 - 1] = normalsList[i3 - 1];
+                            }
                         }
-                        if (int.TryParse(strs[2], out int i3))
+                    }
+                    else
+                    {
+                        foreach (string str in new string[] { strings[1], strings[2], strings[3] })
                         {
-                            normalsArray[i1 - 1] = normalsList[i3 - 1];
+                            string[] strs = str.Split('/');
+                            if (int.TryParse(strs[0], out int i1))
+                            {
+                                elementList.Add(i1 - 1);
+                            }
+                            if (int.TryParse(strs[1], out int i2))
+                            {
+                                textureArray[i1 - 1] = textureList[i2 - 1];
+                            }
+                            if (int.TryParse(strs[2], out int i3))
+                            {
+                                normalsArray[i1 - 1] = normalsList[i3 - 1];
+                            }
                         }
                     }
                 }
@@ -157,6 +194,7 @@ namespace Castles
             }
             return m;
         }
+
         private static void LoadSpec(Action<string> f, string name, CSV csv)
         {
             string s = csv?[name]?[1];

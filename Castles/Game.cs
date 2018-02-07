@@ -18,10 +18,10 @@ namespace Castles
         public Game()
         {
             Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
-            player = Create(new Entity(Loader.LoadModel("!Dragon", (Texture)null, entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
+            player = Create(new Entity(Loader.LoadModel("!Stuhl", entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
             c = Create(new EntityCamera(player));
             player.Position = new Vector3(100, 100, 100);
-            c.Offset = new Vector3(0, 5, 0);
+            //c.Offset = new Vector3(0, 5, 0);
             c.Position = new Vector3(0, 5, 20);
 
             Create(new Terrain(0, 0));

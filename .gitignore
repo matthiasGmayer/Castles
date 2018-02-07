@@ -4,3 +4,8 @@ packages/*
 bin/*
 obj/*
 Castles.sln
+packages
+bin
+obj
+Debug
+Release

@@ -42,13 +42,17 @@ namespace Castles
         private Vector3 targetLook;
         public Vector3 Offset { get; set; }
 
-        public float Distance { get; set; }
+        private float distance;
+        private float minDistance = 10f;
+        private float maxDistance = 100f;
+        public float Distance { get => distance; set { distance = targetDistance = Math.Max(Math.Min(value, minDistance), maxDistance); } }
         private float targetDistance;
 
         public float Horizontal { get; private set; }
-        public float Vertical{ get; private set;}
+        public float Vertical { get; private set; }
 
-        public override Vector3 Position {
+        public override Vector3 Position
+        {
             get
             {
                 return targetLook + new Vector3((float)Math.Cos(Horizontal), (float)Math.Sin(Vertical), (float)Math.Sin(Horizontal)) * Distance;
@@ -77,7 +81,7 @@ namespace Castles
         {
             float factor = (float)Math.Pow(0.1f, delta);
             targetLook = Entity.Position - ((Entity.Position - targetLook) * new Vector3(factor));
-            Distance = targetDistance - ((targetDistance - Distance) * factor);
+            distance = targetDistance - ((targetDistance - distance) * factor);
             //Vector3 targetPos = Entity.Position - (Entity.Position - Position).Normalize() * new Vector3(Distance);
             //Position = targetPos - ((targetPos - Position) * new Vector3(factor));
             //Vector3 p = Position;

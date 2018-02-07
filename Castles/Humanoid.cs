@@ -8,7 +8,10 @@ namespace Castles
 {
     class Humanoid
     {
-        //private Entity head, helm, chest;
-        //private Entity[] shoulders, feet, hands;
+        private Entity head, helm, chest;
+        private Entity[] shoulders, feet, hands;
+
+        public Model Head { set { head = new Entity(value, head); } }
+
     }
 }

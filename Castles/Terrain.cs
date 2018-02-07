@@ -186,11 +186,14 @@ namespace Castles
             {
                 float total = 0;
 
-                total += GetInterpolatedNoise(x / 1024f, z / 1024f) * 5;
-                total += GetInterpolatedNoise(x / 128f, z / 128f);
-                total += GetInterpolatedNoise(x / 8f, z / 8f) / 64f;
-                total += GetInterpolatedNoise(x, z ) / 128f;
-                total += GetInterpolatedNoise(x / 16f, z / 16f) / 64f;
+                int h = 0;
+                float factor = 15.15f;
+
+                total += GetInterpolatedNoise(x / 1024f + h++ * factor, z / 1024f + h++ * factor) * 5;
+                total += GetInterpolatedNoise(x / 128f + h++ * factor, z / 128f + h++ * factor);
+                total += GetInterpolatedNoise(x / 8f + h++ * factor, z / 8f + h++ * factor) / 64f;
+                total += GetInterpolatedNoise(x + h++ * factor, z + h++ * factor) / 128f;
+                total += GetInterpolatedNoise(x / 16f + h++ * factor, z / 16f + h++ * factor) / 64f;
                 //total += (float)Math.Pow(GetInterpolatedNoise(x / 1280f, z / 1280)+1, 9f) * GetInterpolatedNoise(x/2f,z/2f);
 
                 return total * amplitude;

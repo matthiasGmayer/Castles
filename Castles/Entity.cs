@@ -28,6 +28,7 @@ namespace Castles
         }
 
         public Entity(Model model, Vector3 position, Vector3 rotation, float scale) : this(model, position, rotation, scale, null) { }
+        public Entity(Model model, Entity entity) : this(model, entity.Position, entity.Rotation, entity.Scale, entity.Parent) { }
 
         public virtual void Render()
         {
