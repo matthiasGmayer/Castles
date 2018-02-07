@@ -1,5 +1,6 @@
 
 .vs
-packages
-bin
-obj
+packages/*
+bin/*
+obj/*
+Castles.sln
