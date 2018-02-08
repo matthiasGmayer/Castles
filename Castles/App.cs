@@ -24,7 +24,7 @@ namespace Castles
 
         protected override void OnLoad(EventArgs e)
         {
-
+            base.OnLoad(e);
             VSync = VSyncMode.Off;
             CursorVisible = false;
             Gl.Enable(EnableCap.Multisample);
@@ -39,6 +39,8 @@ namespace Castles
             game.SetProjection(Width, Height);
         }
         
+
+
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);

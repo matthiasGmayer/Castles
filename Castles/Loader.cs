@@ -17,6 +17,7 @@ namespace Castles
 
         public static Dictionary<string, Model> modelMap = new Dictionary<string, Model>();
         public static Dictionary<string, Texture> textureMap = new Dictionary<string, Texture>();
+
         public static Texture LoadTexture(string file)
         {
             if (!Path.HasExtension(file))
@@ -27,6 +28,9 @@ namespace Castles
             Texture t;
             if (!textureMap.ContainsKey(name))
             {
+                if (!File.Exists(file))
+                    return null;
+
                 textureMap.Add(name, t = new Texture(file));
             }
             else

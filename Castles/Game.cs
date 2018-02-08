@@ -18,7 +18,7 @@ namespace Castles
         public Game()
         {
             Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
-            player = Create(new Entity(Loader.LoadModel("!Stuhl", entityShader), new Vector3(), new Vector3(0, 0, 0), 1f));
+            player = Create(new Humanoid());
             c = Create(new EntityCamera(player));
             player.Position = new Vector3(100, 100, 100);
             //c.Offset = new Vector3(0, 5, 0);
@@ -185,6 +185,9 @@ namespace Castles
             if (toAdd.Contains(e))
                 return null;
             toAdd.Add(e);
+            if (e is Entity)
+                foreach (Entity child in (e as Entity).Childs)
+                    Create(child);
             return e;
         }
 
@@ -202,6 +205,9 @@ namespace Castles
                 gameObjects.Add(e);
                 if (e is IRenderable r)
                 {
+                    if (r.Model == null)
+                        continue;
+
                     if (!entityMap.ContainsKey(r.Model))
                         entityMap.Add(r.Model, new List<IRenderable>());
                     entityMap[r.Model].Add(r);
@@ -225,7 +231,7 @@ namespace Castles
             foreach (ShaderProgram s in Shaders.GetShaders())
             {
                 s.Use();
-                s["projection_matrix"].SetValue(Matrix4.CreatePerspectiveFieldOfView(0.45f, width / height, 0.1f, 100000f));
+                s["projection_matrix"].SetValue(Matrix4.CreatePerspectiveFieldOfView(0.45f, width / height, 1f, 10000f));
             }
         }
 

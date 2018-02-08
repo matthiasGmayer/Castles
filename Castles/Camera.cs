@@ -44,9 +44,10 @@ namespace Castles
 
         private float distance;
         private float minDistance = 10f;
-        private float maxDistance = 100f;
-        public float Distance { get => distance; set { distance = targetDistance = Math.Max(Math.Min(value, minDistance), maxDistance); } }
+        private float maxDistance = 1000f;
+        public float Distance { get => distance; set { distance = targetDistance = Math.Min(Math.Max(value, minDistance), maxDistance); } }
         private float targetDistance;
+        private float TargetDistance { get => targetDistance; set { targetDistance = Math.Min(Math.Max(value, minDistance), maxDistance); } }
 
         public float Horizontal { get; private set; }
         public float Vertical { get; private set; }
@@ -57,16 +58,6 @@ namespace Castles
             {
                 return targetLook + new Vector3((float)Math.Cos(Horizontal), (float)Math.Sin(Vertical), (float)Math.Sin(Horizontal)) * Distance;
             }
-            //set
-            //{
-            //    Vector3 pos = value;
-            //    Vector3 t = targetLook + Offset;
-            //    Vector2 pos2 = new Vector2(pos.X, pos.Y);
-            //    Vector2 t2 = new Vector2(t.X, t.Y);
-            //    Horizontal = (float)Tools.GetAngle(t2, pos2);
-            //    Vertical = (float)Tools.GetAngle(new Vector2(0, pos.Y), new Vector2((pos2 - t2).Length(), t.Y));
-            //    minDistance = (value - pos).Length();
-            //}
         }
 
 
@@ -103,7 +94,7 @@ namespace Castles
 
         public void OnScroll(float change)
         {
-            targetDistance += change * 10f;
+            TargetDistance += change * 10f;
         }
     }
 }
