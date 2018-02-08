@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace Castles
 {
-    class Humanoid : Entity, IUpdatable
+    class Humanoid : Entity, IUpdatable, IRenderable
     {
 
         private ShaderProgram entityShader = Shaders.GetShader("Entity");
 
         private Entity head, helm, chest;
-        private Entity[] shoulders, feet, hands;
+        private Entity[] shoulders, feet, leg, hands;
 
         public Model Head { set { head = new Entity(value, head); } }
         public Model Helm { set { helm = new Entity(value, helm); } }
@@ -33,6 +33,9 @@ namespace Castles
             shoulders = new Entity[] { new Entity(Loader.LoadModel(shoulder, entityShader), parent: this), new Entity(Loader.LoadModel(shoulder2, entityShader), parent: this) };
             feet = new Entity[] { new Entity(Loader.LoadModel(foot, entityShader), parent: this), new Entity(Loader.LoadModel(foot2, entityShader), parent: this) };
             hands = new Entity[] { new Entity(Loader.LoadModel(hand, entityShader), parent: this), new Entity(Loader.LoadModel(hand2, entityShader), parent: this) };
+            this.helm.Parent = this.head;
+            this.head.Parent = this.chest;
+            this.
         }
 
         public Humanoid() : this("!Cube", "!Cube", "!Cube", "!Cube", "!Cube", "!Cube", "!Cube", "!Cube", "!Cube")
@@ -47,4 +50,55 @@ namespace Castles
 
         }
     }
+
+    public class Joint
+    {
+        public readonly int index;// ID
+        public readonly String name;
+        public readonly List<Joint> children = new List<Joint>();
+
+        private Matrix4 animatedTransform = new Matrix4();
+
+        private readonly Matrix4 localBindTransform;
+        private Matrix4 inverseBindTransform = new Matrix4();
+
+        public Joint(int index, String name, Matrix4 bindLocalTransform)
+        {
+            this.index = index;
+            this.name = name;
+            this.localBindTransform = bindLocalTransform;
+        }
+
+        public void addChild(Joint child)
+        {
+            this.children.Add(child);
+        }
+
+        public Matrix4 getAnimatedTransform()
+        {
+            return animatedTransform;
+        }
+
+        public void setAnimationTransform(Matrix4 animationTransform)
+        {
+            this.animatedTransform = animationTransform;
+        }
+
+        public Matrix4 getInverseBindTransform()
+        {
+            return inverseBindTransform;
+        }
+
+        protected void calcInverseBindTransform(Matrix4 parentBindTransform)
+        {
+            Matrix4 bindTransform = parentBindTransform * localBindTransform;
+            bindTransform.Inverse();
+            inverseBindTransform.Inverse();
+            foreach (Joint child in children)
+            {
+                child.calcInverseBindTransform(bindTransform);
+            }
+        }
+    }
 }
+    
