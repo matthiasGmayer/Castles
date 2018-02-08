@@ -17,6 +17,7 @@ namespace Castles
 
         public Game()
         {
+            Create(new Skybox());
             Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
             player = Create(new Humanoid());
             c = Create(new EntityCamera(player));
@@ -160,6 +161,8 @@ namespace Castles
         public void SetLights(ShaderProgram program)
         {
             program.Use();
+            if (program["pointLightNumber"] == null)
+                return;
             int i = 0;
             foreach (PointLight l in gameObjects.Where(x => x is PointLight))
             {
@@ -240,6 +243,8 @@ namespace Castles
             Loader.Dispose();
             Shaders.Dispose();
             Terrain.Dispose();
+            foreach (IDisposable d in gameObjects.Where(o => o is IDisposable))
+                d.Dispose();
         }
     }
 }

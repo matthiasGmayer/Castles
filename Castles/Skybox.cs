@@ -4,24 +4,41 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenGL;
+using System.Numerics;
+using System.Drawing;
 
 namespace Castles
 {
-    class Skybox
+    class Skybox : IDisposable, IRenderable
     {
+        public static ShaderProgram skyboxShader = Shaders.GetShader("Sky");
+
+        public static float size = 100f;
+
+        private SkyModel model;
+
+        private class SkyModel : Model
+        {
+            public override void Bind()
+            {
+
+            }
+            public SkyModel(VAO vao) : base(vao, null)
+            {}
+        }
+
+        public Model Model => model;
+
         public Skybox()
         {
-            Gl.ActiveTexture(0);
-            Gl.Enable(EnableCap.TextureCubeMap);
-            uint id = Gl.GenTexture();
-            Gl.BindTexture(TextureTarget.TextureCubeMapPositiveX, id);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, TextureParameter.Nearest);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, TextureParameter.Nearest);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, TextureParameter.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, TextureParameter.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, TextureParameter.ClampToEdge);
-            Gl.TexImage2D(TextureTarget.TextureCubeMapNegativeX,0,PixelInternalFormat.Rgba, 10,10,0,PixelFormat.Rgba, PixelType.UnsignedByte, )
-            IntPtr i = new IntPtr();
+            Console.WriteLine(  skyboxShader.ProgramLog);
+            uint id = Loader.LoadCubeMap("Sky");
+            model = new SkyModel(Geometry.CreateCube(skyboxShader, new Vector3(-size / 2f), new Vector3(size / 2f)));
+        }
+
+        public void Dispose()
+        {
+            Model.Dispose();
         }
     }
 }

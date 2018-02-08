@@ -17,6 +17,7 @@ namespace Castles
 
         public static Dictionary<string, Model> modelMap = new Dictionary<string, Model>();
         public static Dictionary<string, Texture> textureMap = new Dictionary<string, Texture>();
+        public static Dictionary<string, uint> cubeTextureMap = new Dictionary<string, uint>();
 
         public static Texture LoadTexture(string file)
         {
@@ -45,24 +46,51 @@ namespace Castles
 
             if (Gl.IsExtensionSupported(Extension.GL_EXT_texture_filter_anisotropic))
                 Gl.TexParameterf(TextureTarget.Texture2D, TextureParameterName.MaxAnisotropyExt,
-                    Math.Min(4f,
-                    Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)
-                    )
-                    );
+                    Math.Min(4f,Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)));
             return t;
         }
+        
+        public static uint LoadCubeMap(string file)
+        {
+            file = file.Replace("!", defaultTex);
 
+
+            string name = Path.GetFileNameWithoutExtension(file);
+            if (cubeTextureMap.ContainsKey(name))
+                return cubeTextureMap[name];
+
+
+
+            Gl.ActiveTexture(0);
+            Gl.Enable(EnableCap.TextureCubeMap);
+            uint id = Gl.GenTexture();
+            cubeTextureMap.Add(name, id);
+            Gl.BindTexture(TextureTarget.TextureCubeMapPositiveX, id);
+            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, TextureParameter.Nearest);
+            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, TextureParameter.Nearest);
+            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, TextureParameter.ClampToEdge);
+            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, TextureParameter.ClampToEdge);
+            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, TextureParameter.ClampToEdge);
+            for (int i = 0; i < 1; i++)
+            {
+                Gl.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgba, 128, 128, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            }
+            
+            return id;
+
+        }
 
         public static void Dispose()
         {
-            foreach(var r in textureMap)
+            foreach (var r in textureMap)
             {
                 r.Value.Dispose();
             }
-            foreach(var r in modelMap)
+            foreach (var r in modelMap)
             {
                 r.Value.Dispose();
             }
+            Gl.DeleteTextures(cubeTextureMap.Values.Count, cubeTextureMap.Values.ToArray());
         }
         public static Model LoadModel(string obj, Texture tex, ShaderProgram program)
         {
@@ -202,12 +230,12 @@ namespace Castles
         private static void LoadSpec(Action<string> f, string name, CSV csv)
         {
             string s = csv?[name]?[1];
-            if(s != null)
+            if (s != null)
                 f(s);
         }
 
         public static Model LoadModel(string obj, string tex, ShaderProgram program)
-        { 
+        {
             if (!Path.HasExtension(tex))
                 tex = tex + ".png";
             tex = tex.Replace("!", defaultTex);

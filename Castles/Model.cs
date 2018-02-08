@@ -33,7 +33,7 @@ namespace Castles
             Vao.Draw();
         }
 
-        public void Bind()
+        public virtual void Bind()
         {
             if (texture != null)
                 Gl.BindTexture(texture);
