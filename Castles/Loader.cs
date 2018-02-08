@@ -46,10 +46,10 @@ namespace Castles
 
             if (Gl.IsExtensionSupported(Extension.GL_EXT_texture_filter_anisotropic))
                 Gl.TexParameterf(TextureTarget.Texture2D, TextureParameterName.MaxAnisotropyExt,
-                    Math.Min(4f,Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)));
+                    Math.Min(4f, Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)));
             return t;
         }
-        
+
         public static uint LoadCubeMap(string file)
         {
             file = file.Replace("!", defaultTex);
@@ -65,19 +65,38 @@ namespace Castles
             Gl.Enable(EnableCap.TextureCubeMap);
             uint id = Gl.GenTexture();
             cubeTextureMap.Add(name, id);
-            Gl.BindTexture(TextureTarget.TextureCubeMapPositiveX, id);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, TextureParameter.Nearest);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, TextureParameter.Nearest);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, TextureParameter.ClampToEdge);
+            Gl.BindTexture(TextureTarget.TextureCubeMap, id);
+            for (int i = 0; i < 6; i++)
+            {
+                Console.WriteLine(file + "/" + nameMap[i] + ".png");
+                System.Drawing.Bitmap b = new System.Drawing.Bitmap(file + "/" + nameMap[i] + ".png");
+                System.Drawing.Imaging.BitmapData data = b.LockBits(new System.Drawing.Rectangle(0, 0, b.Width, b.Height),
+                System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+
+                //Gl.PixelStoref(PixelStoreParameter.UnpackRowLength, b.Width);
+                //Gl.PixelStorei(PixelStoreParameter.UnpackAlignment, 1);
+                Gl.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data.Scan0);
+                b.UnlockBits(data);
+            }
             Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, TextureParameter.ClampToEdge);
             Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, TextureParameter.ClampToEdge);
-            for (int i = 0; i < 1; i++)
-            {
-                Gl.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgba, 128, 128, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
-            }
-            
+            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, TextureParameter.Linear);
+            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, TextureParameter.Linear);
+            //Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, TextureParameter.ClampToEdge);
             return id;
+        }
 
+        private static Dictionary<int, string> nameMap = new Dictionary<int, string>();
+        static Loader()
+        {
+            nameMap.Add(0, "left");
+            nameMap.Add(1, "right");
+            nameMap.Add(2, "top");
+            nameMap.Add(3, "bottom");
+            nameMap.Add(4, "front");
+            nameMap.Add(5, "back");
         }
 
         public static void Dispose()

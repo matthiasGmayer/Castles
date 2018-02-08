@@ -35,7 +35,6 @@ namespace Castles
             hands = new Entity[] { new Entity(Loader.LoadModel(hand, entityShader), parent: this), new Entity(Loader.LoadModel(hand2, entityShader), parent: this) };
             this.helm.Parent = this.head;
             this.head.Parent = this.chest;
-            this.
         }
 
         public Humanoid() : this("!Cube", "!Cube", "!Cube", "!Cube", "!Cube", "!Cube", "!Cube", "!Cube", "!Cube")

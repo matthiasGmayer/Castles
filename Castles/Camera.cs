@@ -23,6 +23,8 @@ namespace Castles
         {
             program.Use();
             program["view_matrix"]?.SetValue(GetViewMatrix());
+
+            program["rotate_view_matrix"]?.SetValue(GetRotateViewMatrix());
             Gl.UseProgram(0);
         }
 
@@ -33,6 +35,13 @@ namespace Castles
                 Matrix4.CreateRotationY(-Rotation.Y) *
                 Matrix4.CreateRotationZ(-Rotation.Z) *
                 Matrix4.CreateTranslation(-Position);
+        }
+        protected virtual Matrix4 GetRotateViewMatrix()
+        {
+            return
+                Matrix4.CreateRotationX(-Rotation.X) *
+                Matrix4.CreateRotationY(-Rotation.Y) *
+                Matrix4.CreateRotationZ(-Rotation.Z);
         }
     }
 
@@ -49,9 +58,25 @@ namespace Castles
         private float targetDistance;
         private float TargetDistance { get => targetDistance; set { targetDistance = Math.Min(Math.Max(value, minDistance), maxDistance); } }
 
-        public float Horizontal { get; private set; }
-        public float Vertical { get; private set; }
+        private float horizontal, vertical;
+        public float Horizontal
+        {
+            get => horizontal;
+            private set
+            {
+                horizontal = value;
+                horizontal %= (float)(2 * Math.PI);
+            }
 
+        }
+        public float Vertical
+        {
+            get => vertical;
+            private set
+            {
+                vertical = (float)Math.Min(Math.Max(value, -Math.PI/2), Math.PI/2);
+            }
+        }
         public override Vector3 Position
         {
             get
@@ -85,6 +110,7 @@ namespace Castles
         }
 
         protected override Matrix4 GetViewMatrix() => Matrix4.LookAt(Position, targetLook + Offset, Vector3.UnitY);
+        protected override Matrix4 GetRotateViewMatrix() => Matrix4.LookAt(new Vector3(), targetLook + Offset - Position, Vector3.UnitY);
 
         public void OnMouseMoved(Vector2 change)
         {

@@ -7,5 +7,4 @@ uniform samplerCube cubeMap;
 
 void main(void){
 	vFragColor = texture(cubeMap, tex);
-	vFragColor = vec4(1);
 }
