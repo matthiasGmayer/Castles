@@ -10,3 +10,5 @@ obj
 Debug
 Release
 *.exe
+*.cache
+*.ide
