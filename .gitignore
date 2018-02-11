@@ -1,8 +1,7 @@
-
-.vs
-packages/*
-bin/*
-obj/*
+.vs/
+packages
+bin
+obj
 Castles.sln
 packages
 bin

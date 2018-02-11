@@ -8,6 +8,8 @@ namespace Castles
     public static class Shaders
     {
         private static Dictionary<string, ShaderProgram> shaderMap = new Dictionary<string, ShaderProgram>();
+        private static Dictionary<string, List<ShaderProgram>> paramMap = new Dictionary<string, List<ShaderProgram>>();
+
 
         private static void AddShader(string name)
         {
@@ -17,8 +19,8 @@ namespace Castles
                 if (p != null)
                     return;
                 string file = "../../shaders/" + name;
-                Console.WriteLine(file);
                 p = new ShaderProgram(File.ReadAllText(file + ".vert"), File.ReadAllText(file + ".frag"));
+                Console.WriteLine(name + "\n" + p.ProgramLog);
                 shaderMap.Add(name, p);
             }
             catch (Exception e)
@@ -41,11 +43,24 @@ namespace Castles
                     continue;
                 AddShader(s);
             }
+
+        }
+
+        public static IEnumerable<ShaderProgram> With(string s)
+        {
+            if (!paramMap.ContainsKey(s))
+            {
+                paramMap.Add(s, new List<ShaderProgram>());
+                foreach (ShaderProgram p in GetShaders())
+                    if (p[s] != null)
+                        paramMap[s].Add(p);
+            }
+            return paramMap[s];
         }
 
         public static void Dispose()
         {
-            foreach(var r in shaderMap)
+            foreach (var r in shaderMap)
             {
                 r.Value.DisposeChildren = true;
                 r.Value.Dispose();
@@ -54,7 +69,7 @@ namespace Castles
 
 
         public static ShaderProgram GetShader(string name) => shaderMap.ContainsKey(name) ? shaderMap[name] : null;
-            
+
 
     }
 }

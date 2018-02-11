@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace Castles
 {
-    public class Entity : IDisposable, IRenderable, ITransformable
+    public class Entity : IRenderable, ITransformable
     {
         public Model Model { get; }
 
@@ -41,13 +41,6 @@ namespace Castles
 
         public Entity(Model model, Entity entity) : this(model, entity.Position, entity.Rotation, entity.Scale, entity.Parent) { }
 
-        public virtual void Render()
-        {
-            Model?.Program.Use();
-            Model?.Program["transformation_matrix"]?.SetValue(GetTransformationMatrix());
-            Model?.Render();
-        }
-
         public virtual Matrix4 GetTransformationMatrix()
         {
 
@@ -59,11 +52,6 @@ namespace Castles
 
 
             return Parent == null ? transformation : Parent.GetTransformationMatrix() * transformation;
-        }
-
-        public void Dispose()
-        {
-            Model?.Dispose();
         }
     }
 }

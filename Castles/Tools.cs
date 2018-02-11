@@ -28,9 +28,7 @@ namespace Castles
             return angle;
         }
 
-        public static float GetAngle(Vector2 point)
-        {
-            return GetAngle(new Vector2(0, 0), point);
-        }
+        public static float GetAngle(Vector2 point) => GetAngle(new Vector2(0, 0), point);
+        
     }
 }

@@ -17,7 +17,6 @@ namespace Castles
 
         public static Dictionary<string, Model> modelMap = new Dictionary<string, Model>();
         public static Dictionary<string, Texture> textureMap = new Dictionary<string, Texture>();
-        public static Dictionary<string, uint> cubeTextureMap = new Dictionary<string, uint>();
 
         public static Texture LoadTexture(string file)
         {
@@ -37,79 +36,45 @@ namespace Castles
             else
                 t = textureMap[name];
 
-
-
-            Gl.BindTexture(t);
-            Gl.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-            Gl.TexParameteri(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, TextureParameter.LinearMipMapLinear);
-            Gl.TexParameterf(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, 0);
-
-            if (Gl.IsExtensionSupported(Extension.GL_EXT_texture_filter_anisotropic))
-                Gl.TexParameterf(TextureTarget.Texture2D, TextureParameterName.MaxAnisotropyExt,
-                    Math.Min(4f, Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)));
             return t;
         }
 
-        public static uint LoadCubeMap(string file)
+        public static Texture LoadCubeMap(string file)
         {
             file = file.Replace("!", defaultTex);
 
 
             string name = Path.GetFileNameWithoutExtension(file);
-            if (cubeTextureMap.ContainsKey(name))
-                return cubeTextureMap[name];
-
-
-
-            Gl.ActiveTexture(0);
-            Gl.Enable(EnableCap.TextureCubeMap);
-            uint id = Gl.GenTexture();
-            cubeTextureMap.Add(name, id);
-            Gl.BindTexture(TextureTarget.TextureCubeMap, id);
-            for (int i = 0; i < 6; i++)
+            if (!textureMap.ContainsKey(name))
             {
-                Console.WriteLine(file + "/" + nameMap[i] + ".png");
-                System.Drawing.Bitmap b = new System.Drawing.Bitmap(file + "/" + nameMap[i] + ".png");
-                System.Drawing.Imaging.BitmapData data = b.LockBits(new System.Drawing.Rectangle(0, 0, b.Width, b.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-
-                //Gl.PixelStoref(PixelStoreParameter.UnpackRowLength, b.Width);
-                //Gl.PixelStorei(PixelStoreParameter.UnpackAlignment, 1);
-                Gl.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data.Scan0);
-                b.UnlockBits(data);
+                Gl.ActiveTexture(0);
+                Gl.Enable(EnableCap.TextureCubeMap);
+                Texture t;
+                textureMap.Add(name, t = new Texture());
+                Gl.BindTexture(TextureTarget.TextureCubeMap, t.ID);
+                for (int i = 0; i < 6; i++)
+                {
+                    Texture.TextureGl(TextureTarget.TextureCubeMapPositiveX + i, file + "/" + nameMap[i] + ".png", System.Drawing.RotateFlipType.RotateNoneFlipNone);
+                }
+                Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, TextureParameter.ClampToEdge);
+                Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, TextureParameter.ClampToEdge);
+                Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, TextureParameter.Linear);
+                Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, TextureParameter.Linear);
+                //Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, TextureParameter.ClampToEdge);
             }
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, TextureParameter.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, TextureParameter.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, TextureParameter.Linear);
-            Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, TextureParameter.Linear);
-            //Gl.TexParameteri(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, TextureParameter.ClampToEdge);
-            return id;
+            return textureMap[name];
         }
 
         private static Dictionary<int, string> nameMap = new Dictionary<int, string>();
         static Loader()
         {
-            nameMap.Add(0, "left");
-            nameMap.Add(1, "right");
-            nameMap.Add(2, "top");
-            nameMap.Add(3, "bottom");
-            nameMap.Add(4, "front");
-            nameMap.Add(5, "back");
-        }
-
-        public static void Dispose()
-        {
-            foreach (var r in textureMap)
-            {
-                r.Value.Dispose();
-            }
-            foreach (var r in modelMap)
-            {
-                r.Value.Dispose();
-            }
-            Gl.DeleteTextures(cubeTextureMap.Values.Count, cubeTextureMap.Values.ToArray());
+            int h = 0;
+            nameMap.Add(h++, "left");
+            nameMap.Add(h++, "right");
+            nameMap.Add(h++, "top");
+            nameMap.Add(h++, "bottom");
+            nameMap.Add(h++, "front");
+            nameMap.Add(h++, "back");
         }
         public static Model LoadModel(string obj, Texture tex, ShaderProgram program)
         {

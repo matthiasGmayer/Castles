@@ -1,11 +1,12 @@
 ﻿using System;
 using OpenGL;
+using System.Collections.Generic;
 
 namespace Castles
 {
     public class Model
     {
-
+        private static List<Model> models = new List<Model>();
         public float Reflectivity { get; set; }
         public float ShineDamper { get; set; }
 
@@ -20,33 +21,37 @@ namespace Castles
             this.texture = texture;
             Reflectivity = 1f;
             ShineDamper = 100f;
+            models.Add(this);
         }
 
 
 
         public void Render()
         {
-            Program["reflectivity"].SetValue(Reflectivity);
-            Program["shineDamper"].SetValue(ShineDamper);
+            Program["reflectivity"]?.SetValue(Reflectivity);
+            Program["shineDamper"]?.SetValue(ShineDamper);
             if (texture != null)
-                Gl.BindTexture(texture);
+                Graphics.Bind(texture);
             Vao.Draw();
         }
 
         public virtual void Bind()
         {
             if (texture != null)
-                Gl.BindTexture(texture);
+                Graphics.Bind(texture);
             else
-                Gl.BindTexture(TextureTarget.Texture2D,0);
+                Gl.BindTexture(TextureTarget.Texture2D, 0);
 
             Gl.BindVertexArray(Vao.ID);
         }
 
-        internal void Dispose()
+        public static void Dispose()
         {
-            Vao.DisposeChildren = true;
-            Vao.Dispose();
+            foreach (Model m in models)
+            {
+                m.Vao.DisposeChildren = true;
+                m.Vao.Dispose();
+            }
         }
     }
 }
