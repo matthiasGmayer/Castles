@@ -13,6 +13,7 @@ namespace Castles
         private Camera c;
         Entity player;
         ShaderProgram entityShader = Shaders.GetShader("Entity");
+
         public Game()
         {
             Create(new GUITexture(new Texture(Graphics.fbos[FrameBuffers.waterRefraction].TextureID[0]), new Vector2(0.5f, -1), new Vector2(0.5f)));
