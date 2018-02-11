@@ -15,6 +15,8 @@ namespace Castles
         Entity player;
         ShaderProgram entityShader = Shaders.GetShader("Entity");
 
+        AnimatedModel human = new AnimatedModel(model,texture,chest,)
+
         public Game()
         {
             Create(new Skybox());
