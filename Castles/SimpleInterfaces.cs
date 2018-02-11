@@ -10,7 +10,8 @@ namespace Castles
 {
    // public interface IDisposable { void Dispose(); }
     public interface IUpdatable { void Update(float delta); }
-    public interface IRenderable { Model Model { get;  } }
+    public interface IRenderable { Model Model { get; } }
+    public interface IGUI { Model Model { get; } }
     public interface ITransformable { Matrix4 GetTransformationMatrix(); }
     public interface IMouseGetter { void OnMouseMoved(Vector2 change); }
     public interface IScrollGetter { void OnScroll(float change); }

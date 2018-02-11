@@ -11,19 +11,31 @@ namespace Castles
     class Camera
     {
         public virtual Vector3 Position { get; set; }
-        public Vector3 Rotation { get; set; }
 
-        public Camera(Vector3 position, Vector3 rotation)
+        public float yaw, pitch, roll;
+
+        public Camera(Vector3 position, float jaw, float pitch, float roll)
         {
             Position = position;
-            Rotation = rotation;
+            this.yaw = jaw;
+            this.pitch = pitch;
+            this.roll = roll;
+        }
+
+        public Camera(Camera camera)
+        {
+            Position = camera.Position;
         }
 
         public void SetView(ShaderProgram program)
         {
             program.Use();
             program["view_matrix"]?.SetValue(GetViewMatrix());
-
+            Gl.UseProgram(0);
+        }
+        public void SetRotateView(ShaderProgram program)
+        {
+            program.Use();
             program["rotate_view_matrix"]?.SetValue(GetRotateViewMatrix());
             Gl.UseProgram(0);
         }
@@ -31,18 +43,13 @@ namespace Castles
         protected virtual Matrix4 GetViewMatrix()
         {
             return
-                Matrix4.CreateRotationX(-Rotation.X) *
-                Matrix4.CreateRotationY(-Rotation.Y) *
-                Matrix4.CreateRotationZ(-Rotation.Z) *
-                Matrix4.CreateTranslation(-Position);
+                Matrix4.CreateTranslation(-Position) *
+                Matrix4.CreateRotationY(yaw) *
+                Matrix4.CreateRotationX(pitch) *
+                Matrix4.CreateRotationZ(roll);
         }
-        protected virtual Matrix4 GetRotateViewMatrix()
-        {
-            return
-                Matrix4.CreateRotationX(-Rotation.X) *
-                Matrix4.CreateRotationY(-Rotation.Y) *
-                Matrix4.CreateRotationZ(-Rotation.Z);
-        }
+        protected virtual Matrix4 GetRotateViewMatrix() => GetViewMatrix().RemoveColumn(3, 3);
+        
     }
 
     class EntityCamera : Camera, IUpdatable, IMouseGetter, IScrollGetter
@@ -56,48 +63,37 @@ namespace Castles
         private float maxDistance = 1000f;
         public float Distance { get => distance; set { distance = targetDistance = Math.Min(Math.Max(value, minDistance), maxDistance); } }
         private float targetDistance;
+        private float targetPitch;
+        private float targetYaw;
+
         private float TargetDistance { get => targetDistance; set { targetDistance = Math.Min(Math.Max(value, minDistance), maxDistance); } }
 
-        private float horizontal, vertical;
-        public float Horizontal
-        {
-            get => horizontal;
-            private set
-            {
-                horizontal = value;
-                horizontal %= (float)(2 * Math.PI);
-            }
-
-        }
-        public float Vertical
-        {
-            get => vertical;
-            private set
-            {
-                vertical = (float)Math.Min(Math.Max(value, -Math.PI/2), Math.PI/2);
-            }
-        }
-        public override Vector3 Position
-        {
-            get
-            {
-                return targetLook + new Vector3((float)Math.Cos(Horizontal), (float)Math.Sin(Vertical), (float)Math.Sin(Horizontal)) * Distance;
-            }
-        }
-
-
-        public EntityCamera(Entity entity) : base(new Vector3(), new Vector3())
+        public EntityCamera(Entity entity) : base(new Vector3(), 20,0,0)
         {
             Entity = entity;
             Distance = 100f;
             Actions.Subscribe(this);
+            
         }
 
         public void Update(float delta)
         {
-            float factor = (float)Math.Pow(0.1f, delta);
+            float factor = (float)Math.Pow(0.01f, delta);
             targetLook = Entity.Position - ((Entity.Position - targetLook) * new Vector3(factor));
             distance = targetDistance - ((targetDistance - distance) * factor);
+            yaw = targetYaw - ((targetYaw - yaw) * factor);
+            pitch = targetPitch - ((targetPitch - pitch) * factor);
+
+
+            float angle = (float)Math.PI - yaw;
+            float h = (float)Math.Cos(pitch) * Distance;
+            float v = (float)Math.Sin(pitch) * Distance;
+            Position = new Vector3(-h * (float)Math.Sin(angle), v, -h * (float)Math.Cos(angle)) + targetLook;
+
+
+
+
+
             //Vector3 targetPos = Entity.Position - (Entity.Position - Position).Normalize() * new Vector3(Distance);
             //Position = targetPos - ((targetPos - Position) * new Vector3(factor));
             //Vector3 p = Position;
@@ -109,13 +105,10 @@ namespace Castles
             //}
         }
 
-        protected override Matrix4 GetViewMatrix() => Matrix4.LookAt(Position, targetLook + Offset, Vector3.UnitY);
-        protected override Matrix4 GetRotateViewMatrix() => Matrix4.LookAt(new Vector3(), targetLook + Offset - Position, Vector3.UnitY);
-
         public void OnMouseMoved(Vector2 change)
         {
-            Horizontal -= change.X / 1000f;
-            Vertical -= change.Y / 1000f;
+            targetYaw -= change.X / 1000f;
+            targetPitch -= change.Y / 1000f;
         }
 
         public void OnScroll(float change)

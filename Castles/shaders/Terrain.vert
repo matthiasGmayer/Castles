@@ -11,6 +11,7 @@ uniform vec3 pointLight[MAXLIGHTS];
 uniform vec3 dirLight[MAXLIGHTS];
 uniform int pointLightNumber;
 uniform int dirLightNumber;
+uniform vec4 clipPlane;
 
 out vec3 normal;
 out vec3 toLight[MAXLIGHTS];
@@ -19,9 +20,12 @@ out vec2 uv;
 
 void main(void){
 
+
 	uv = in_uv;
 
 	vec4 worldPosition = transformation_matrix * vec4(in_position, 1);
+	gl_ClipDistance[0] = dot(worldPosition, clipPlane);
+
 	normal = vec3((transformation_matrix * vec4(in_normal,0)).xyz);
 	for(int i = 0; i < pointLightNumber + dirLightNumber && i < MAXLIGHTS; i++){
 	

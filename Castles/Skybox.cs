@@ -9,37 +9,31 @@ using System.Drawing;
 
 namespace Castles
 {
-    class Skybox : IDisposable, IRenderable
+    class Skybox : IDisposable, IRenderable, IUpdatable, ITransformable
     {
         public static ShaderProgram skyboxShader = Shaders.GetShader("Sky");
+       
 
-        public static float size = 10000f;
-
-        private SkyModel model;
-        static uint id = Loader.LoadCubeMap("!Sky2");
-        private class SkyModel : Model
-        {
-            public override void Bind()
-            {
-                Gl.ActiveTexture(0);
-                Gl.BindTexture(TextureTarget.TextureCubeMap, id);
-            }
-            public SkyModel(VAO vao) : base(vao, null)
-            {}
-        }
-
+        private Model model;
         public Model Model => model;
 
-        public Skybox()
+        public Skybox(string file)
         {
-            Console.WriteLine(  skyboxShader.ProgramLog);
-           
-            model = new SkyModel(Geometry.CreateCube(skyboxShader, new Vector3(size / 2f), new Vector3(-size / 2f)));
+            model = new Model(Geometry.CreateCube(skyboxShader, new Vector3(Graphics.viewDistance/2), new Vector3(-Graphics.viewDistance/2)), Loader.LoadCubeMap(file));
         }
 
         public void Dispose()
         {
             Model.Dispose();
         }
+
+        float time;
+
+        public void Update(float delta)
+        {
+            time += delta;
+        }
+
+        public Matrix4 GetTransformationMatrix() => Matrix4.CreateRotationY(time / 100f);
     }
 }

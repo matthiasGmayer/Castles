@@ -10,21 +10,22 @@ namespace Castles
     class Game
     {
         private IList<object> gameObjects = new List<object>();
-        private EntityCamera c;
-        Entity d;
+        private Camera c;
         Entity player;
         ShaderProgram entityShader = Shaders.GetShader("Entity");
-
         public Game()
         {
-            Create(new Skybox());
-            Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
-            player = Create(new Humanoid());
-            c = Create(new EntityCamera(player));
-            player.Position = new Vector3(100, 100, 100);
-            //c.Offset = new Vector3(0, 5, 0);
-            c.Position = new Vector3(0, 5, 20);
+            Create(new GUITexture(new Texture(Graphics.fbos[FrameBuffers.waterRefraction].TextureID[0]), new Vector2(0.5f, -1), new Vector2(0.5f)));
+            Create(new GUITexture(new Texture(Graphics.fbos[FrameBuffers.waterReflection].TextureID[0]), new Vector2(-1), new Vector2(0.5f)));
+            Create(new Water(new Vector3(0, 0, 0), new Vector2(10000, 10000)));
+            Create(new Skybox("!Sky2"));
 
+            Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
+            player = Create(new Entity(Loader.LoadModel("!Dragon", entityShader)));
+            //Create(new Entity(Water.quad, player));
+            c = Create(new EntityCamera(player));
+            //c = Create(new Camera(new Vector3(0, 100, 0), 0, 0, 0));
+            //c.Offset = new Vector3(0, 5, 0);
             Create(new Terrain(0, 0));
             Create(new Terrain(0, 1));
             Create(new Terrain(0, -1));
@@ -37,33 +38,29 @@ namespace Castles
         }
         public void Update(float delta)
         {
+            //c.Position += new Vector3(0, delta * 100f, 0);
+            ////c.yaw += delta;
+            ////c.pitch += delta;
             ManageObjects();
             ManageTerrain();
 
             float speed = delta * 500f;
-            player.Position = new Vector3(player.Position.X, Terrain.GetHeight(player.Position.X, player.Position.Z)+30, player.Position.Z);
+            player.Position = new Vector3(player.Position.X, Terrain.GetHeight(player.Position.X, player.Position.Z) + 30, player.Position.Z);
             Vector3 v = new Vector3();
 
             if (Actions.IsPressed(OpenTK.Input.Key.S))
-            {
                 v += new Vector3(1, 0, 0);
-            }
             if (Actions.IsPressed(OpenTK.Input.Key.W))
-            {
                 v -= new Vector3(1, 0, 0);
-            }
             if (Actions.IsPressed(OpenTK.Input.Key.A))
-            {
                 v += new Vector3(0, 0, 1);
-            }
             if (Actions.IsPressed(OpenTK.Input.Key.D))
-            {
                 v -= new Vector3(0, 0, 1);
-            }
 
 
             if (v != new Vector3(0))
-                player.Position += Matrix4.CreateRotationY(c.Horizontal) * (v / v.Length() * speed);
+                player.Position += Matrix4.CreateRotationY((float)Math.PI / 2 + c.yaw) * (v / v.Length() * speed);
+
             foreach (IUpdatable u in gameObjects.Where(o => o is IUpdatable))
             {
                 u.Update(delta);
@@ -88,7 +85,6 @@ namespace Castles
 
             if (!tile.Equals(lastTile))
             {
-                Console.WriteLine("HALLO");
                 //Terras(tx, ty);
                 //Create(Terrain.GetTerrain(tx, tz));
                 //Create(Terrain.GetTerrain(tx + 1, tz - 1));
@@ -116,30 +112,92 @@ namespace Castles
             return Task.Factory.StartNew(() => Create(t));
         }
 
-        Dictionary<Model, List<IRenderable>> entityMap = new Dictionary<Model, List<IRenderable>>();
+        Dictionary<Model, List<object>> renderMap = new Dictionary<Model, List<object>>();
         public void Render()
         {
+            SetupShaders();
+            RenderTerrain();
+            RenderEntites();
+            RenderGui();
+            RenderWater();
+        }
 
-            foreach (ShaderProgram shader in Shaders.GetShaders())
+        private void RenderWater()
+        {
+            Water.waterShader.Use();
+            foreach (Water w in gameObjects.Where(o => o is Water))
             {
-                c.SetView(shader);
-                SetLights(shader);
+                Graphics.fbos[FrameBuffers.waterRefraction].Enable();
+                SetupShaders(new Vector4(0, -1, 0, w.Position.Y));
+                RenderTerrain();
+                RenderEntites();
+                Graphics.fbos[FrameBuffers.waterRefraction].Disable();
+                Graphics.fbos[FrameBuffers.waterReflection].Enable();
+                float y = c.Position.Y;
+                c.pitch *= -1;
+                c.Position = new Vector3(c.Position.X, 2 * w.Position.Y - y, c.Position.Z);
+                SetupShaders(new Vector4(0, 1, 0, -w.Position.Y));
+                RenderTerrain();
+                RenderEntites();
+                Graphics.fbos[FrameBuffers.waterReflection].Disable();
+                c.Position = new Vector3(c.Position.X, y, c.Position.Z);
+                c.pitch *= -1;
+                SetupShaders();
+                Water.waterShader.Use();
+                Water.quad.Bind();
+                Water.quad.Vao.BindAttributes(Water.waterShader);
+                Water.waterShader["transformation_matrix"].SetValue(w.GetTransformationMatrix());
+                Gl.DrawElements(BeginMode.Triangles, Water.quad.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
             }
+        }
 
+        private void RenderGui()
+        {
+            foreach (var r in renderMap)
+            {
+                r.Key.Bind();
+                r.Key.Vao.BindAttributes(r.Key.Program);
+                foreach (IGUI rend in r.Value.Where(o => o is IGUI))
+                {
+                    rend.Model.Program.Use();
+                    Gl.DrawElements(BeginMode.Triangles, r.Key.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
+                    Gl.UseProgram(0);
+                }
+                Gl.BindVertexArray(0);
+            }
+        }
+
+        private void SetupShaders(Vector4 clipPlane)
+        {
+            if (clipPlane == new Vector4(0))
+                Gl.Disable(EnableCap.ClipPlane0);
+            else
+                Gl.Enable(EnableCap.ClipPlane0);
+
+            Shaders.With("pointLightNumber").ForEach(s => SetLights(s));
+            Shaders.With("view_matrix").ForEach(s => c.SetView(s));
+            Shaders.With("rotate_view_matrix").ForEach(s => c.SetRotateView(s));
+            Shaders.With("clipPlane").ForEach(s => { s.Use(); s["clipPlane"].SetValue(clipPlane); });
+        }
+        private void SetupShaders() => SetupShaders(new Vector4());
+
+        private void RenderTerrain()
+        {
             foreach (Terrain t in gameObjects.Where(o => o is Terrain))
             {
                 t.Vao.Program.Use();
                 t.Render();
                 Gl.UseProgram(0);
             }
+        }
 
-            foreach (var r in entityMap)
+        private void RenderEntites()
+        {
+            foreach (var r in renderMap)
             {
-
                 r.Key.Bind();
-
                 r.Key.Vao.BindAttributes(r.Key.Program);
-                foreach (IRenderable rend in r.Value)
+                foreach (IRenderable rend in r.Value.Where(o => o is IRenderable))
                 {
                     r.Key.Program.Use();
                     if (rend is ITransformable t)
@@ -151,18 +209,13 @@ namespace Castles
                     Gl.DrawElements(BeginMode.Triangles, r.Key.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
                     Gl.UseProgram(0);
                 }
-
                 Gl.BindVertexArray(0);
             }
-
         }
-
 
         public void SetLights(ShaderProgram program)
         {
             program.Use();
-            if (program["pointLightNumber"] == null)
-                return;
             int i = 0;
             foreach (PointLight l in gameObjects.Where(x => x is PointLight))
             {
@@ -210,10 +263,17 @@ namespace Castles
                 {
                     if (r.Model == null)
                         continue;
-
-                    if (!entityMap.ContainsKey(r.Model))
-                        entityMap.Add(r.Model, new List<IRenderable>());
-                    entityMap[r.Model].Add(r);
+                    if (!renderMap.ContainsKey(r.Model))
+                        renderMap.Add(r.Model, new List<object>());
+                    renderMap[r.Model].Add(r);
+                }
+                if (e is IGUI g)
+                {
+                    if (g.Model == null)
+                        continue;
+                    if (!renderMap.ContainsKey(g.Model))
+                        renderMap.Add(g.Model, new List<object>());
+                    renderMap[g.Model].Add(g);
                 }
             }
             toAdd.Clear();
@@ -223,7 +283,7 @@ namespace Castles
                 gameObjects.Remove(e);
                 if (e is IRenderable r)
                 {
-                    entityMap[r.Model].Remove(r);
+                    renderMap[r.Model].Remove(r);
                 }
             }
             toRemove.Clear();
@@ -231,18 +291,20 @@ namespace Castles
 
         internal void SetProjection(float width, float height)
         {
-            foreach (ShaderProgram s in Shaders.GetShaders())
+            foreach (ShaderProgram s in Shaders.With("projection_matrix"))
             {
                 s.Use();
-                s["projection_matrix"].SetValue(Matrix4.CreatePerspectiveFieldOfView(0.45f, width / height, 1f, 10000f));
+                s["projection_matrix"].SetValue(Matrix4.CreatePerspectiveFieldOfView(0.45f, width / height, 1f, Graphics.viewDistance));
             }
         }
 
         public void Dispose()
         {
-            Loader.Dispose();
+            Texture.Dispose();
+            Model.Dispose();
             Shaders.Dispose();
             Terrain.Dispose();
+            Graphics.Dispose();
             foreach (IDisposable d in gameObjects.Where(o => o is IDisposable))
                 d.Dispose();
         }

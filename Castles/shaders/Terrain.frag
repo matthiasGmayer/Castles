@@ -25,7 +25,6 @@ void main(void){
 	float factor = pow(unitNormal.y, 40);
 	vec4 color = factor * grass + (1 - factor) * stone ;
 
-
 	vec3 finalDiffuse = vec3(0);
 	//vec3 finalSpecular = vec3(0);
 	vec3 unitToCamera = normalize(toCamera);
