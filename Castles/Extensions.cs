@@ -48,4 +48,9 @@ namespace Castles
                 a(t);
         }
     }
+    public static class ShaderExtensions
+    {
+        public static void SetTexture(this ShaderProgram p, string s, int i) => Gl.Uniform1i(Gl.GetUniformLocation(p.ProgramID, s), i);
+        
+    }
 }

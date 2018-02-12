@@ -13,20 +13,15 @@ namespace Castles
         private Camera c;
         Entity player;
         ShaderProgram entityShader = Shaders.GetShader("Entity");
-
+        Water water;
         public Game()
         {
-            Create(new GUITexture(new Texture(Graphics.fbos[FrameBuffers.waterRefraction].TextureID[0]), new Vector2(0.5f, -1), new Vector2(0.5f)));
-            Create(new GUITexture(new Texture(Graphics.fbos[FrameBuffers.waterReflection].TextureID[0]), new Vector2(-1), new Vector2(0.5f)));
-            Create(new Water(new Vector3(0, 0, 0), new Vector2(10000, 10000)));
+            water = Create(new Water(new Vector3(0, 0, 0), new Vector2(10000, 10000), 1, 0.02f));
             Create(new Skybox("!Sky2"));
 
             Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
             player = Create(new Entity(Loader.LoadModel("!Dragon", entityShader)));
-            //Create(new Entity(Water.quad, player));
             c = Create(new EntityCamera(player));
-            //c = Create(new Camera(new Vector3(0, 100, 0), 0, 0, 0));
-            //c.Offset = new Vector3(0, 5, 0);
             Create(new Terrain(0, 0));
             Create(new Terrain(0, 1));
             Create(new Terrain(0, -1));
@@ -37,14 +32,14 @@ namespace Castles
             Create(new Terrain(-1, 1));
             Create(new Terrain(-1, -1));
         }
+
+        float time;
         public void Update(float delta)
         {
-            //c.Position += new Vector3(0, delta * 100f, 0);
-            ////c.yaw += delta;
-            ////c.pitch += delta;
+            time += delta / 1000;
+            time %= 10000;
             ManageObjects();
             ManageTerrain();
-
             float speed = delta * 500f;
             player.Position = new Vector3(player.Position.X, Terrain.GetHeight(player.Position.X, player.Position.Z) + 30, player.Position.Z);
             Vector3 v = new Vector3();
@@ -117,9 +112,9 @@ namespace Castles
         public void Render()
         {
             SetupShaders();
+            RenderGui();
             RenderTerrain();
             RenderEntites();
-            RenderGui();
             RenderWater();
         }
 
@@ -129,9 +124,9 @@ namespace Castles
             foreach (Water w in gameObjects.Where(o => o is Water))
             {
                 Graphics.fbos[FrameBuffers.waterRefraction].Enable();
-                SetupShaders(new Vector4(0, -1, 0, w.Position.Y));
+                //SetupShaders(new Vector4(0, -1, 0, w.Position.Y));
                 RenderTerrain();
-                RenderEntites();
+                RenderEntites(o => !(o is Skybox));
                 Graphics.fbos[FrameBuffers.waterRefraction].Disable();
                 Graphics.fbos[FrameBuffers.waterReflection].Enable();
                 float y = c.Position.Y;
@@ -144,10 +139,7 @@ namespace Castles
                 c.Position = new Vector3(c.Position.X, y, c.Position.Z);
                 c.pitch *= -1;
                 SetupShaders();
-                Water.waterShader.Use();
-                Water.quad.Bind();
-                Water.quad.Vao.BindAttributes(Water.waterShader);
-                Water.waterShader["transformation_matrix"].SetValue(w.GetTransformationMatrix());
+                w.Bind();
                 Gl.DrawElements(BeginMode.Triangles, Water.quad.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
             }
         }
@@ -179,6 +171,7 @@ namespace Castles
             Shaders.With("view_matrix").ForEach(s => c.SetView(s));
             Shaders.With("rotate_view_matrix").ForEach(s => c.SetRotateView(s));
             Shaders.With("clipPlane").ForEach(s => { s.Use(); s["clipPlane"].SetValue(clipPlane); });
+            Shaders.With("time").ForEach(s => { s.Use(); s["time"].SetValue(time); });
         }
         private void SetupShaders() => SetupShaders(new Vector4());
 
@@ -192,7 +185,8 @@ namespace Castles
             }
         }
 
-        private void RenderEntites()
+        private void RenderEntites() => RenderEntites(s => true);
+        private void RenderEntites(Predicate<IRenderable> p)
         {
             foreach (var r in renderMap)
             {
@@ -200,6 +194,8 @@ namespace Castles
                 r.Key.Vao.BindAttributes(r.Key.Program);
                 foreach (IRenderable rend in r.Value.Where(o => o is IRenderable))
                 {
+                    if (!p(rend))
+                        continue;
                     r.Key.Program.Use();
                     if (rend is ITransformable t)
                         r.Key.Program["transformation_matrix"]?.SetValue(t.GetTransformationMatrix());
@@ -292,11 +288,9 @@ namespace Castles
 
         internal void SetProjection(float width, float height)
         {
-            foreach (ShaderProgram s in Shaders.With("projection_matrix"))
-            {
-                s.Use();
-                s["projection_matrix"].SetValue(Matrix4.CreatePerspectiveFieldOfView(0.45f, width / height, 1f, Graphics.viewDistance));
-            }
+            Shaders.With("projection_matrix").ForEach(s =>{s.Use();s["projection_matrix"].SetValue(Matrix4.CreatePerspectiveFieldOfView(0.45f, width / height, 1f, Graphics.viewDistance));});
+            Shaders.With("near").ForEach(s => { s.Use(); s["near"].SetValue(1f); });
+            Shaders.With("far").ForEach(s => { s.Use(); s["far"].SetValue(Graphics.viewDistance); });
         }
 
         public void Dispose()

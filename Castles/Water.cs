@@ -11,6 +11,22 @@ namespace Castles
     public class Water
     {
         public static ShaderProgram waterShader = Shaders.GetShader("Water");
+        public static Texture reflection;
+        public static Texture refraction;
+        public static Texture refractionDepth;
+
+        static Water()
+        {
+            waterShader.Use();
+            waterShader.SetTexture("reflectionTex", 1);
+            waterShader.SetTexture("refractionTex", 0);
+            waterShader.SetTexture("dudvTex", 2);
+            waterShader.SetTexture("normalTex", 3);
+            waterShader.SetTexture("depthTex", 4);
+            reflection = new Texture(Graphics.fbos[FrameBuffers.waterReflection].TextureID[0]);
+            refraction = new Texture(Graphics.fbos[FrameBuffers.waterRefraction].TextureID[0]);
+            refractionDepth = new Texture(Graphics.fbos[FrameBuffers.waterRefraction].DepthID);
+        }
 
         public static Model quad = new Model(new VAO(waterShader,
             new VBO<Vector3>(new Vector3[]
@@ -26,11 +42,31 @@ namespace Castles
             }, BufferTarget.ElementArrayBuffer, BufferUsageHint.StaticRead)), null);
         public Vector3 Position { get; set; }
         public Vector2 Scale { get; set; }
+        public float WaveSize { get; set; }
+        public float WaveStrength { get; set; }
 
-        public Water(Vector3 position, Vector2 scale)
+        public Water(Vector3 position, Vector2 scale, float waveSize = 1, float waveStrength = 1)
         {
             Position = position;
             Scale = scale;
+            WaveSize = waveSize;
+            WaveStrength = waveStrength;
+        }
+
+        public void Bind()
+        {
+            waterShader.Use();
+            quad.Vao.BindAttributes(waterShader);
+            waterShader["transformation_matrix"].SetValue(GetTransformationMatrix());
+            waterShader["size"]?.SetValue(Scale);
+            waterShader["waveSize"]?.SetValue(WaveSize);
+            waterShader["waveStrength"]?.SetValue(WaveStrength);
+            Graphics.Bind(refraction);
+            Graphics.Bind(reflection, 1);
+            Graphics.Bind(Loader.LoadTexture("!DuDv"), 2);
+            Graphics.Bind(Loader.LoadTexture("!WaterNormal"), 3);
+            Graphics.Bind(refractionDepth,4);
+
         }
 
         public Matrix4 GetTransformationMatrix() => Matrix4.CreateScaling(new Vector3(Scale.X, 0, Scale.Y)) * Matrix4.CreateTranslation(Position);

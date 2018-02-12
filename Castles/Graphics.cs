@@ -22,11 +22,12 @@ namespace Castles
         static Graphics()
         {
             fbos.Add(FrameBuffers.waterReflection, new FBO(new Size(Width,Height), 
-                new FramebufferAttachment[] {FramebufferAttachment.ColorAttachment0, FramebufferAttachment.DepthAttachment, },
+                new FramebufferAttachment[] {FramebufferAttachment.ColorAttachment0},
                 PixelInternalFormat.Rgba));
             fbos.Add(FrameBuffers.waterRefraction, new FBO(new Size(Width, Height),
-                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0, FramebufferAttachment.DepthAttachment, },
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0},
                 PixelInternalFormat.Rgba));
+            fbos[FrameBuffers.waterRefraction].Attachments.ForEach(s => Console.WriteLine(s));
         }
 
         public static void Dispose()
@@ -37,14 +38,12 @@ namespace Castles
 
         public static int Width => App.app.Width;
         public static int Height => App.app.Height;
-        public static void Bind(Texture t, TextureTarget tr)
+        public static void Bind(Texture t, int textureUnit = 0, TextureTarget tr = TextureTarget.Texture2D)
         {
+            Gl.ActiveTexture(textureUnit);
             Gl.BindTexture(tr, t.ID);
         }
-        public static void Bind(Texture t)
-        {
-            Bind(t, TextureTarget.Texture2D);
-        }
+        public static void Bind(Texture t, TextureTarget tr) => Bind(t, 0, tr);
 
 
 

@@ -24,12 +24,8 @@ namespace Castles
         static Terrain()
         {
             terrainShader.Use();
-            //terrainShader["grassTex"].SetValue(0);
-            //terrainShader["stoneTex"].SetValue(1);
-            //stoneTexture = Loader.LoadTexture("!Stone.jpg");
-            //grassTexture = Loader.LoadTexture("!Grass.jpg");
-            Gl.Uniform1i(Gl.GetUniformLocation(terrainShader.ProgramID, "grassTex"), 0);
-            Gl.Uniform1i(Gl.GetUniformLocation(terrainShader.ProgramID, "stoneTex"), 1);
+            terrainShader.SetTexture("grassTex", 0);
+            terrainShader.SetTexture("stoneTex", 1);
         }
 
 
@@ -154,13 +150,10 @@ namespace Castles
 
         public void Render()
         {
-            Gl.ActiveTexture(0);
             Graphics.Bind(grassTexture);
-            Gl.ActiveTexture(1);
-            Graphics.Bind(stoneTexture);
+            Graphics.Bind(stoneTexture, 1);
             Vao.Program["transformation_matrix"]?.SetValue(Matrix4.CreateTranslation(new Vector3(Position.X * spacing * length, 0, Position.Z * spacing * length)));
             Vao.Draw();
-            Gl.ActiveTexture(0);
         }
 
         public static void Dispose()

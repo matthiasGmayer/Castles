@@ -5,9 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
 using System.Collections;
-using DragonBones;
 using OpenTK.Graphics.OpenGL;
 
 namespace Castles
@@ -53,7 +51,7 @@ namespace Castles
 
         }
     }
-
+    /*
         public class Joint
     {
         public readonly int index;// ID
@@ -897,7 +895,7 @@ namespace Castles
         private float convertDataToArrays()
         {
             float furthestPoint = 0;
-            for (int i = 0; i < vertices.size(); i++)
+            for (int i = 0; i < vertices.Count; i++)
             {
                 Vertex currentVertex = vertices.get(i);
                 if (currentVertex.getLength() > furthestPoint)
@@ -943,7 +941,7 @@ namespace Castles
                 }
                 else
                 {
-                    Vertex duplicateVertex = new Vertex(vertices.size(), previousVertex.getPosition(), previousVertex.getWeightsData());
+                    Vertex duplicateVertex = new Vertex(vertices.Count, previousVertex.getPosition(), previousVertex.getWeightsData());
                     duplicateVertex.setTextureIndex(newTextureIndex);
                     duplicateVertex.setNormalIndex(newNormalIndex);
                     previousVertex.setDuplicateVertex(duplicateVertex);
@@ -957,16 +955,16 @@ namespace Castles
 
         private void initArrays()
         {
-            this.verticesArray = new float[vertices.size() * 3];
-            this.texturesArray = new float[vertices.size() * 2];
-            this.normalsArray = new float[vertices.size() * 3];
-            this.jointIdsArray = new int[vertices.size() * 3];
-            this.weightsArray = new float[vertices.size() * 3];
+            this.verticesArray = new float[vertices.Count * 3];
+            this.texturesArray = new float[vertices.Count * 2];
+            this.normalsArray = new float[vertices.Count * 3];
+            this.jointIdsArray = new int[vertices.Count * 3];
+            this.weightsArray = new float[vertices.Count * 3];
         }
 
         private void removeUnusedVertices()
         {
-            for (Vertex vertex : vertices)
+            foreach (Vertex vertex in vertices)
             {
                 vertex.averageTangents();
                 if (!vertex.isSet())
@@ -988,7 +986,7 @@ namespace Castles
 
         private int jointCount = 0;
 
-        private static final Matrix4f CORRECTION = new Matrix4f().rotate((float) Math.toRadians(-90), new Vector3f(1, 0, 0));
+        private static readonly Matrix4 CORRECTION = new Matrix4().rotate((float) Math.toRadians(-90), new Vector3f(1, 0, 0));
 
 	public SkeletonLoader(XmlNode visualSceneNode, List<String> boneOrder)
         {
@@ -1424,34 +1422,34 @@ namespace Castles
     public class VertexSkinData
     {
 
-        public final List<Integer> jointIds = new ArrayList<Integer>();
-        public final List<Float> weights = new ArrayList<Float>();
+        public readonly List<int> jointIds = new List<int>();
+        public readonly List<float> weights = new List<float>();
 
         public void addJointEffect(int jointId, float weight)
         {
-            for (int i = 0; i < weights.size(); i++)
+            for (int i = 0; i < weights.Count; i++)
             {
-                if (weight > weights.get(i))
+                if (weight > weights.[i])
                 {
-                    jointIds.add(i, jointId);
-                    weights.add(i, weight);
+                    jointIds.Insert(i, jointId);
+                    weights.Insert(i, weight);
                     return;
                 }
             }
-            jointIds.add(jointId);
-            weights.add(weight);
+            jointIds.Add(jointId);
+            weights.Add(weight);
         }
 
         public void limitJointNumber(int max)
         {
-            if (jointIds.size() > max)
+            if (jointIds.Count > max)
             {
                 float[] topWeights = new float[max];
                 float total = saveTopWeights(topWeights);
                 refillWeightList(topWeights, total);
                 removeExcessJointIds(max);
             }
-            else if (jointIds.size() < max)
+            else if (jointIds.Count < max)
             {
                 fillEmptyWeights(max);
             }
@@ -1459,7 +1457,7 @@ namespace Castles
 
         private void fillEmptyWeights(int max)
         {
-            while (jointIds.size() < max)
+            while (jointIds.Count < max)
             {
                 jointIds.add(0);
                 weights.add(0f);
@@ -1488,9 +1486,9 @@ namespace Castles
 
         private void removeExcessJointIds(int max)
         {
-            while (jointIds.size() > max)
+            while (jointIds.Count > max)
             {
-                jointIds.remove(jointIds.size() - 1);
+                jointIds.remove(jointIds.Count - 1);
             }
         }
 
@@ -1513,20 +1511,20 @@ namespace Castles
 
         /**
          * @return The name of the XML node.
-         */
-        public String getName()
-        {
-            return name;
-        }
+        // */
+        //public String getName()
+        //{
+        //    return name;
+        //}
 
         /**
          * @return Any text data contained between the start and end tag of the
          *         node.
          */
-        public String getData()
-        {
-            return data;
-        }
+        //public String getData()
+        //{
+        //    return data;
+        //}
 
         /**
          * Gets the value of a certain attribute of the node. Returns {@code null}
@@ -1536,16 +1534,16 @@ namespace Castles
          *            - the name of the attribute.
          * @return The value of the attribute.
          */
-        public String getAttribute(String attr)
-        {
-            if (attributes != null)
-            {
-                return attributes.get(attr);
-            }
-            else
-            {
-                return null;
-            }
+        //public String getAttribute(String attr)
+        //{
+        //    if (attributes != null)
+        //    {
+        //        return attributes.get(attr);
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
         }
 
         /**
@@ -1555,19 +1553,19 @@ namespace Castles
          *            - the name of the child node.
          * @return The child XML node with the given name.
          */
-        public XmlNode getChild(String childName)
-        {
-            if (childNodes != null)
-            {
-                List<XmlNode> nodes = childNodes.get(childName);
-                if (nodes != null && !nodes.isEmpty())
-                {
-                    return nodes.get(0);
-                }
-            }
-            return null;
+        //public XmlNode getChild(String childName)
+        //{
+        //    if (childNodes != null)
+        //    {
+        //        List<XmlNode> nodes = childNodes.get(childName);
+        //        if (nodes != null && !nodes.isEmpty())
+        //        {
+        //            return nodes.get(0);
+        //        }
+        //    }
+        //    return null;
 
-        }
+        //}
 
         /**
          * Gets a child node with a certain name, and with a given value of a given
@@ -1583,23 +1581,23 @@ namespace Castles
          * @return The child node which has the correct name and the correct value
          *         for the chosen attribute.
          */
-        public XmlNode getChildWithAttribute(String childName, String attr, String value)
-        {
-            List<XmlNode> children = getChildren(childName);
-            if (children == null || children.isEmpty())
-            {
-                return null;
-            }
-            for (XmlNode child : children)
-            {
-                String val = child.getAttribute(attr);
-                if (value.equals(val))
-                {
-                    return child;
-                }
-            }
-            return null;
-        }
+        //public XmlNode getChildWithAttribute(String childName, String attr, String value)
+        //{
+        //    List<XmlNode> children = getChildren(childName);
+        //    if (children == null || children.isEmpty())
+        //    {
+        //        return null;
+        //    }
+        //    for (XmlNode child : children)
+        //    {
+        //        String val = child.getAttribute(attr);
+        //        if (value.equals(val))
+        //        {
+        //            return child;
+        //        }
+        //    }
+        //    return null;
+        //}
 
         /**
          * Get the child nodes of this node that have a given name.
@@ -1609,18 +1607,18 @@ namespace Castles
          * @return A list of the child nodes with the given name. If none exist then
          *         an empty list is returned.
          */
-        public List<XmlNode> getChildren(String name)
-        {
-            if (childNodes != null)
-            {
-                List<XmlNode> children = childNodes.get(name);
-                if (children != null)
-                {
-                    return children;
-                }
-            }
-            return new ArrayList<XmlNode>();
-        }
+        //public List<XmlNode> getChildren(String name)
+        //{
+        //    if (childNodes != null)
+        //    {
+        //        List<XmlNode> children = childNodes.get(name);
+        //        if (children != null)
+        //        {
+        //            return children;
+        //        }
+        //    }
+        //    return new ArrayList<XmlNode>();
+        //}
 
         /**
          * Adds a new attribute to this node. An attribute has a name and a value.
@@ -1632,14 +1630,14 @@ namespace Castles
          * @param value
          *            - the value of the attribute.
          */
-        protected void addAttribute(String attr, String value)
-        {
-            if (attributes == null)
-            {
-                attributes = new HashMap<String, String>();
-            }
-            attributes.put(attr, value);
-        }
+        //protected void addAttribute(String attr, String value)
+        //{
+        //    if (attributes == null)
+        //    {
+        //        attributes = new HashMap<String, String>();
+        //    }
+        //    attributes.put(attr, value);
+        //}
 
         /**
          * Adds a child node to this node.
@@ -1647,20 +1645,20 @@ namespace Castles
          * @param child
          *            - the child node to add.
          */
-        protected void addChild(XmlNode child)
-        {
-            if (childNodes == null)
-            {
-                childNodes = new HashMap<String, List<XmlNode>>();
-            }
-            List<XmlNode> list = childNodes.get(child.name);
-            if (list == null)
-            {
-                list = new ArrayList<XmlNode>();
-                childNodes.put(child.name, list);
-            }
-            list.add(child);
-        }
+        //protected void addChild(XmlNode child)
+        //{
+        //    if (childNodes == null)
+        //    {
+        //        childNodes = new HashMap<String, List<XmlNode>>();
+        //    }
+        //    List<XmlNode> list = childNodes.get(child.name);
+        //    if (list == null)
+        //    {
+        //        list = new ArrayList<XmlNode>();
+        //        childNodes.put(child.name, list);
+        //    }
+        //    list.add(child);
+        //}
 
         /**
          * Sets some data for this node.
@@ -1669,21 +1667,21 @@ namespace Castles
          *            - the data for this node (text that is found between the start
          *            and end tags of this node).
          */
-        protected void setData(String data)
-        {
-            this.data = data;
-        }
+ //       protected void setData(String data)
+ //       {
+ //           this.data = data;
+ //       }
 
-    }
+ //   }
 
-    public class XmlParser
-    {
+ //   public class XmlParser
+ //   {
 
-        private static final Pattern DATA = Pattern.compile(">(.+?)<");
-	private static final Pattern START_TAG = Pattern.compile("<(.+?)>");
-	private static final Pattern ATTR_NAME = Pattern.compile("(.+?)=");
-	private static final Pattern ATTR_VAL = Pattern.compile("\"(.+?)\"");
-	private static final Pattern CLOSED = Pattern.compile("(</|/>)");
+ //       private static final Pattern DATA = Pattern.compile(">(.+?)<");
+	//private static final Pattern START_TAG = Pattern.compile("<(.+?)>");
+	//private static final Pattern ATTR_NAME = Pattern.compile("(.+?)=");
+	//private static final Pattern ATTR_VAL = Pattern.compile("\"(.+?)\"");
+	//private static final Pattern CLOSED = Pattern.compile("(</|/>)");
 
 	/**
 	 * Reads an XML file and stores all the data in {@link XmlNode} objects,
@@ -1692,7 +1690,7 @@ namespace Castles
 	 * @param file - the XML file
 	 * @return The root node of the XML structure.
 	 */
-	public static XmlNode loadXmlFile(MyFile file)
+	/*public static XmlNode loadXmlFile(MyFile file)
         {
             BufferedReader reader = null;
             try
@@ -1776,8 +1774,8 @@ namespace Castles
         Matcher match = START_TAG.matcher(line);
         match.find();
         return match.group(1);
-    }
+    }*/
 
     
     
-}
+
