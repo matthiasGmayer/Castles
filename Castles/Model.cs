@@ -41,7 +41,6 @@ namespace Castles
                 Graphics.Bind(texture);
             else
                 Gl.BindTexture(TextureTarget.Texture2D, 0);
-
             Gl.BindVertexArray(Vao.ID);
         }
 

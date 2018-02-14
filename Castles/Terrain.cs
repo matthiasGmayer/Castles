@@ -26,6 +26,7 @@ namespace Castles
             terrainShader.Use();
             terrainShader.SetTexture("grassTex", 0);
             terrainShader.SetTexture("stoneTex", 1);
+            terrainShader.SetTexture("skyTex", 2);
         }
 
 
@@ -150,11 +151,11 @@ namespace Castles
 
         public void Render()
         {
-            Graphics.Bind(grassTexture);
-            Graphics.Bind(stoneTexture, 1);
-            Vao.Program["transformation_matrix"]?.SetValue(Matrix4.CreateTranslation(new Vector3(Position.X * spacing * length, 0, Position.Z * spacing * length)));
             Vao.Draw();
         }
+
+        public Matrix4 GetTransformationMatrix() => Matrix4.CreateTranslation(new Vector3(Position.X * spacing * length, 0, Position.Z * spacing * length));
+        
 
         public static void Dispose()
         {

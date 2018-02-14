@@ -23,9 +23,11 @@ namespace Castles
             waterShader.SetTexture("dudvTex", 2);
             waterShader.SetTexture("normalTex", 3);
             waterShader.SetTexture("depthTex", 4);
+            waterShader.SetTexture("skyTex", 5);
             reflection = new Texture(Graphics.fbos[FrameBuffers.waterReflection].TextureID[0]);
             refraction = new Texture(Graphics.fbos[FrameBuffers.waterRefraction].TextureID[0]);
-            refractionDepth = new Texture(Graphics.fbos[FrameBuffers.waterRefraction].DepthID);
+            refractionDepth = new Texture(Graphics.fbos[FrameBuffers.waterDepth].DepthID);
+            //refractionDepth = new Texture(Graphics.fbos[FrameBuffers.waterRefraction].DepthID);
         }
 
         public static Model quad = new Model(new VAO(waterShader,
@@ -65,7 +67,8 @@ namespace Castles
             Graphics.Bind(reflection, 1);
             Graphics.Bind(Loader.LoadTexture("!DuDv"), 2);
             Graphics.Bind(Loader.LoadTexture("!WaterNormal"), 3);
-            Graphics.Bind(refractionDepth,4);
+            Graphics.Bind(refractionDepth, 4);
+            Graphics.Bind(new Texture(Graphics.fbos[FrameBuffers.skyBox].TextureID[0]), 5);
 
         }
 
