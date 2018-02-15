@@ -9,6 +9,30 @@ namespace Castles
 {
     public static class Tools
     {
+        public static bool isLineInCylinder(Vector3 linePoint1, Vector3 linePoint2, Vector3 CylinderPoint, float radius, float height)
+        {
+            Vector2 linePointA = linePoint1.XZ();
+            Vector2 linePointB = linePoint2.XZ();
+            Vector2 CylinderPoint2D = CylinderPoint.XZ();
+            Vector2 orthogonalPoint = GetOrthogonalPoint(linePointA, linePointB, CylinderPoint2D);
+            float x = (linePointA - linePointB).Length();
+            if(x > radius)
+            {
+                return false;
+            }
+            else
+            {
+                Vector
+            }
+
+
+        }
+
+        public static bool isLineInCylinder(float x, float y, float z, float x1, float y1, float z1, float x2, float y2, float z2, float radius, float height)
+        {
+            return isLineInCylinder(new Vector3(x, y, z), new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), radius, height);
+        }
+
         public static Vector2 GetIntersectionPoint(Vector2 point1, Vector2 point2, Vector2 point3, Vector2 point4, out bool isIntersecting)
         {
             Vector2 intersection;
