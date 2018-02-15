@@ -9,6 +9,112 @@ namespace Castles
 {
     public static class Tools
     {
+        public static Vector2 GetIntersectionPoint(Vector2 point1, Vector2 point2, Vector2 point3, Vector2 point4, out bool isIntersecting)
+        {
+
+            Vector2 intersection;
+
+            if (point1.X > point2.X)
+            {
+                Vector2 temp = point1;
+                point1 = point2;
+                point2 = temp;
+            }
+            if (point3.X > point4.X)
+            {
+                Vector2 temp = point3;
+                point3 = point4;
+                point4 = temp;
+            }
+            if (point1.X == point2.X && point3.Y == point4.Y)
+            {
+                intersection = new Vector2(point1.X, point3.Y);
+            }
+            else if (point3.X == point4.X && point1.Y == point2.Y)
+            {
+                intersection = new Vector2(point3.X, point1.Y);
+            }
+            else if (point1.X == point2.X)
+            {
+                double pitch = (point4.Y - point3.Y) / (point4.X - point3.X);
+                double b = point3.Y - pitch * point3.X;
+                intersection = new Vector2((float)point1.X, (float)(pitch * point1.X + b));
+            }
+            else if (point3.X == point4.X)
+            {
+                double pitch = (point2.Y - point1.Y) / (point2.X - point1.X);
+                double b = point1.Y - pitch * point1.X;
+                intersection = new Vector2((float)point3.X, (float)(pitch * point3.X + b));
+
+            }
+            else if (point1.Y == point2.Y)
+            {
+                double pitch = (point4.Y - point3.Y) / (point4.X - point3.X);
+                double b = point3.Y - pitch * point3.X;
+                intersection = new Vector2((float)((point1.Y - b) / pitch), (float)point1.Y);
+            }
+            else if (point3.Y == point4.Y)
+            {
+                double pitch = (point2.Y - point1.Y) / (point2.X - point1.X);
+                double b = point1.Y - pitch * point1.X;
+                intersection = new Vector2((float)((point3.Y - b) / pitch), (float)point3.Y);
+
+            }
+            else
+            {
+                double pitch1 = (point2.Y - point1.Y) / (point2.X - point1.X);
+                double b1 = point1.Y - pitch1 * point1.X;
+                double pitch2 = (point4.Y - point3.Y) / (point4.X - point3.X);
+                double b2 = point3.Y - pitch2 * point3.X;
+                double x = (b2 - b1) / (pitch1 - pitch2);
+                intersection = new Vector2((float)x, (float)(pitch1 * x + b1));
+            }
+
+            isIntersecting = (intersection.X >= point1.X && intersection.X <= point2.X &&
+               intersection.X >= point3.X && intersection.X <= point4.X);
+
+                return intersection;
+        }
+        public static Vector2 GetIntersectionPoint(float x1, float x2, float x3, float x4, float x5, float x6, float x7, float x8, out bool isIntersecting)
+        {
+            Vector2 v = GetIntersectionPoint(new Vector2(x1, x2), new Vector2(x3, x4), new Vector2(x5, x6), new Vector2(x7, x8), out bool b);
+            isIntersecting = b;
+            return v;
+        }
+        public static Vector2 GetOrthogonalPoint(Vector2 linePoint1, Vector2 linePoint2, Vector2 point)
+        {
+
+            if (linePoint1.X > linePoint2.X)
+            {
+                Vector2 temp = linePoint1;
+                linePoint1 = linePoint2;
+                linePoint2 = temp;
+            }
+            if (linePoint1.X == linePoint2.X)
+            {
+                return new Vector2(linePoint1.X, point.Y);
+
+            }
+            if (linePoint1.Y == linePoint2.Y)
+            {
+                return new Vector2(point.X, linePoint1.Y);
+            }
+            double pitch1 = (linePoint2.Y - linePoint1.Y) / (linePoint2.X - linePoint1.X);
+            double b1 = linePoint1.Y - pitch1 * linePoint1.X;
+            double pitch2 = -1 / pitch1;
+            double b2 = point.Y - pitch2 * point.X;
+            double x = (b2 - b1) / (pitch1 - pitch2);
+
+            Vector2 orthogonalPoint = new Vector2((float)x, (float)(b2 + pitch2 * x));
+
+            return orthogonalPoint;
+
+        }
+        public static Vector2 GetOrthogonalPoint(float x, float y, float x1, float y1, float x2, float y2)
+        {
+            return GetOrthogonalPoint(new Vector2(x, y), new Vector2(x1, y1), new Vector2(x2, y2));
+        }
+
         public static float BarryCentric(Vector3 p1, Vector3 p2, Vector3 p3, Vector2 pos)
         {
             float det = (p2.Z - p3.Z) * (p1.X - p3.X) + (p3.X - p2.X) * (p1.Z - p3.Z);
