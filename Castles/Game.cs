@@ -25,12 +25,12 @@ namespace Castles
             Create(new Terrain(0, 0));
             Create(new Terrain(0, 1));
             Create(new Terrain(0, -1));
-            Create(new Terrain(1, 0));
-            Create(new Terrain(1, 1));
-            Create(new Terrain(1, -1));
-            Create(new Terrain(-1, 0));
-            Create(new Terrain(-1, 1));
-            Create(new Terrain(-1, -1));
+            //Create(new Terrain(1, 0));
+            //Create(new Terrain(1, 1));
+            //Create(new Terrain(1, -1));
+            //Create(new Terrain(-1, 0));
+            //Create(new Terrain(-1, 1));
+            //Create(new Terrain(-1, -1));
         }
 
         float time;
@@ -182,6 +182,7 @@ namespace Castles
                 t.Vao.Program.Use();
                 t.Render();
                 Gl.UseProgram(0);
+                Console.Write("hi");
             }
         }
 
