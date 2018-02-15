@@ -13,36 +13,49 @@ namespace Castles
         private Camera c;
         Entity player;
         ShaderProgram entityShader = Shaders.GetShader("Entity");
+        ShaderProgram blurShader = Shaders.GetShader("Gaussian");
+        ShaderProgram guiShader = Shaders.GetShader("GUI");
         Water water;
+        PointLight p;
         public Game()
         {
             water = Create(new Water(new Vector3(0, 0, 0), new Vector2(10000, 10000), 1, 0.02f));
             Create(new Skybox("!Sky2"));
 
+            //p = Create(new PointLight(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 0.001f, 0.0002f)));
+            Create(new PointLight(new Vector3(), new Vector3(1, 0, 0), new Vector3(1, 0.001f, 0.0002f)));
+            //Create(new PointLight(new Vector3(), new Vector3(1, 0, 0), new Vector3(1, 0.001f, 0.0002f)));
             Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
             player = Create(new Entity(Loader.LoadModel("!Dragon", entityShader)));
+
+
             c = Create(new EntityCamera(player));
             Create(new Terrain(0, 0));
             Create(new Terrain(0, 1));
             Create(new Terrain(0, -1));
-            //Create(new Terrain(1, 0));
-            //Create(new Terrain(1, 1));
-            //Create(new Terrain(1, -1));
-            //Create(new Terrain(-1, 0));
-            //Create(new Terrain(-1, 1));
-            //Create(new Terrain(-1, -1));
+            Create(new Terrain(1, 0));
+            Create(new Terrain(1, 1));
+            Create(new Terrain(1, -1));
+            Create(new Terrain(-1, 0));
+            Create(new Terrain(-1, 1));
+            Create(new Terrain(-1, -1));
         }
 
         float time;
+        float y;
         public void Update(float delta)
         {
             time += delta / 1000;
             time %= 10000;
             ManageObjects();
             ManageTerrain();
-            float speed = delta * 500f;
+            float speed = delta * 100f;
             player.Position = new Vector3(player.Position.X, Terrain.GetHeight(player.Position.X, player.Position.Z) + 30, player.Position.Z);
+            player.Position += new Vector3(0, y, 0);
+            water.Position = new Vector3(player.Position.X, water.Position.Y, player.Position.Z);
             Vector3 v = new Vector3();
+
+            //p.Position = player.Position;
 
             if (Actions.IsPressed(OpenTK.Input.Key.S))
                 v += new Vector3(1, 0, 0);
@@ -52,7 +65,10 @@ namespace Castles
                 v += new Vector3(0, 0, 1);
             if (Actions.IsPressed(OpenTK.Input.Key.D))
                 v -= new Vector3(0, 0, 1);
-
+            if (Actions.IsPressed(OpenTK.Input.Key.Space))
+                y += delta * 100f;
+            if (Actions.IsPressed(OpenTK.Input.Key.ShiftLeft))
+                y -= delta * 100f;
 
             if (v != new Vector3(0))
                 player.Position += Matrix4.CreateRotationY((float)Math.PI / 2 + c.yaw) * (v / v.Length() * speed);
@@ -112,9 +128,16 @@ namespace Castles
         public void Render()
         {
             SetupShaders();
+            Graphics.fbos[FrameBuffers.skyBox].Enable();
+            RenderObjects(o => o is Skybox);
+            Graphics.fbos[FrameBuffers.skyBox].Disable();
             RenderGui();
             RenderTerrain();
-            RenderEntites();
+            RenderObjects();
+            Graphics.fbos[FrameBuffers.waterDepth].Enable();
+            SetupShaders();
+            RenderTerrain();
+            Graphics.fbos[FrameBuffers.waterDepth].Disable();
             RenderWater();
         }
 
@@ -124,24 +147,63 @@ namespace Castles
             foreach (Water w in gameObjects.Where(o => o is Water))
             {
                 Graphics.fbos[FrameBuffers.waterRefraction].Enable();
-                //SetupShaders(new Vector4(0, -1, 0, w.Position.Y));
+                SetupShaders(new Vector4(0, -1, 0, w.Position.Y));
                 RenderTerrain();
-                RenderEntites(o => !(o is Skybox));
+                RenderObjects(o => !(o is Skybox));
                 Graphics.fbos[FrameBuffers.waterRefraction].Disable();
                 Graphics.fbos[FrameBuffers.waterReflection].Enable();
                 float y = c.Position.Y;
                 c.pitch *= -1;
                 c.Position = new Vector3(c.Position.X, 2 * w.Position.Y - y, c.Position.Z);
-                SetupShaders(new Vector4(0, 1, 0, -w.Position.Y));
+                SetupShaders(new Vector4(0, 1, 0, -w.Position.Y + 0.5f));
                 RenderTerrain();
-                RenderEntites();
+                RenderObjects();
                 Graphics.fbos[FrameBuffers.waterReflection].Disable();
                 c.Position = new Vector3(c.Position.X, y, c.Position.Z);
                 c.pitch *= -1;
                 SetupShaders();
+                Water.waterShader.Use();
                 w.Bind();
                 Gl.DrawElements(BeginMode.Triangles, Water.quad.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
             }
+        }
+
+        /// <summary>
+        /// The Blurred Texture will be in the Gaussian Blur Fbo
+        ///
+        /// </summary>
+        /// <param name="t"></param>
+        private void BlurTexture(Texture t)
+        {
+            BlurTexture(t, Graphics.fbos[FrameBuffers.GaussianBlurHorizontal2], Graphics.fbos[FrameBuffers.GaussianBlur2]);
+            BlurTexture(new Texture(Graphics.fbos[FrameBuffers.GaussianBlur2].TextureID[0]), Graphics.fbos[FrameBuffers.GaussianBlurHorizontal1], Graphics.fbos[FrameBuffers.GaussianBlur1]);
+            BlurTexture(new Texture(Graphics.fbos[FrameBuffers.GaussianBlur1].TextureID[0]), Graphics.fbos[FrameBuffers.GaussianBlurHorizontal], Graphics.fbos[FrameBuffers.GaussianBlur]);
+            //GUITexture tex = new GUITexture(new Texture(Graphics.fbos[FrameBuffers.GaussianBlur1].TextureID[0]), new Vector2(-1), new Vector2(2));
+            //Graphics.fbos[FrameBuffers.GaussianBlur].Enable();
+            //guiShader.Use();
+            //tex.Model.Bind();
+            //Gl.DrawElements(BeginMode.Triangles, tex.Model.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            //Graphics.fbos[FrameBuffers.GaussianBlur].Disable();
+
+        }
+        private void BlurTexture(Texture t, FBO f, FBO f2)
+        {
+            GUITexture tex = new GUITexture(t, new Vector2(-1), new Vector2(2));
+            f.Enable();
+            blurShader.Use();
+            blurShader["targetWidth"].SetValue(f.Size.Width);
+            blurShader["targetHeight"].SetValue(f.Size.Height);
+            tex.Model.Bind();
+            blurShader["vertical"].SetValue(1);
+            Gl.DrawElements(BeginMode.Triangles, tex.Model.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            f.Disable();
+            tex = new GUITexture(new Texture(f.TextureID[0]), new Vector2(-1), new Vector2(2));
+            f2.Enable();
+            blurShader.Use();
+            blurShader["vertical"].SetValue(0);
+            tex.Model.Bind();
+            Gl.DrawElements(BeginMode.Triangles, tex.Model.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            f2.Disable();
         }
 
         private void RenderGui()
@@ -149,7 +211,6 @@ namespace Castles
             foreach (var r in renderMap)
             {
                 r.Key.Bind();
-                r.Key.Vao.BindAttributes(r.Key.Program);
                 foreach (IGUI rend in r.Value.Where(o => o is IGUI))
                 {
                     rend.Model.Program.Use();
@@ -177,22 +238,28 @@ namespace Castles
 
         private void RenderTerrain()
         {
+            Terrain.terrainShader.Use();
+            Graphics.Bind(Terrain.grassTexture);
+            Graphics.Bind(Terrain.stoneTexture, 1);
+            Graphics.Bind(new Texture(Graphics.fbos[FrameBuffers.skyBox].TextureID[0]), 2);
             foreach (Terrain t in gameObjects.Where(o => o is Terrain))
             {
                 t.Vao.Program.Use();
                 t.Render();
                 Gl.UseProgram(0);
                 Console.Write("hi");
+                t.Vao.BindAttributes(Terrain.terrainShader);
+                Terrain.terrainShader["transformation_matrix"]?.SetValue(t.GetTransformationMatrix());
+                Gl.DrawElements(BeginMode.Triangles, t.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
             }
         }
 
-        private void RenderEntites() => RenderEntites(s => true);
-        private void RenderEntites(Predicate<IRenderable> p)
+        private void RenderObjects() => RenderObjects(s => true);
+        private void RenderObjects(Predicate<IRenderable> p)
         {
             foreach (var r in renderMap)
             {
                 r.Key.Bind();
-                r.Key.Vao.BindAttributes(r.Key.Program);
                 foreach (IRenderable rend in r.Value.Where(o => o is IRenderable))
                 {
                     if (!p(rend))

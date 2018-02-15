@@ -12,11 +12,16 @@ uniform vec3 dirLight[MAXLIGHTS];
 uniform int pointLightNumber;
 uniform int dirLightNumber;
 uniform vec4 clipPlane;
+uniform float far;
 
 out vec3 normal;
 out vec3 toLight[MAXLIGHTS];
 out vec3 toCamera;
 out vec2 uv;
+out float visibility;
+out vec4 clipSpace;
+
+const float b = 0.005f;
 
 void main(void){
 
@@ -24,17 +29,26 @@ void main(void){
 	uv = in_uv;
 
 	vec4 worldPosition = transformation_matrix * vec4(in_position, 1);
+	vec4 positionToCamera = view_matrix * worldPosition;
+	vec3 cameraPosition = (inverse(view_matrix) * vec4(0,0,0,1)).xyz;
+	toCamera = cameraPosition - worldPosition.xyz;
+
+	float distance = length(positionToCamera.xyz);
+	visibility = clamp(1.5/(1+exp( 20/far*(distance - far / 3))),0,1);
+
 	gl_ClipDistance[0] = dot(worldPosition, clipPlane);
 
 	normal = vec3((transformation_matrix * vec4(in_normal,0)).xyz);
 	for(int i = 0; i < pointLightNumber + dirLightNumber && i < MAXLIGHTS; i++){
 	
-	if(i >= pointLightNumber)
-			toLight[i] = -dirLight[i];
-		else
+	if(i >= pointLightNumber){
+			toLight[i] = -dirLight[i - pointLightNumber];
+			}
+		else{
 			toLight[i] = pointLight[i] - worldPosition.xyz;
+			}
 	}
-	toCamera = (inverse(view_matrix) * vec4(0,0,0,1)).xyz - worldPosition.xyz;
 
-    gl_Position = projection_matrix * view_matrix * worldPosition;
+    clipSpace = projection_matrix * positionToCamera;
+	gl_Position = clipSpace;
 }

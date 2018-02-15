@@ -156,6 +156,8 @@
     <None Include="Resources\Models\Triangle.obj" />
     <None Include="Resources\Specs\Chair.csv" />
     <None Include="Resources\Textures\Dragon.csv" />
+    <None Include="shaders\Gaussian.frag" />
+    <None Include="shaders\Gaussian.vert" />
     <None Include="shaders\Water.frag" />
     <None Include="shaders\Water.vert" />
     <None Include="shaders\GUI.frag" />

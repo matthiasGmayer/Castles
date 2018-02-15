@@ -11,7 +11,15 @@ namespace Castles
     public enum FrameBuffers
     {
         waterReflection,
-        waterRefraction
+        waterRefraction,
+        skyBox,
+        waterDepth,
+        GaussianBlur,
+        GaussianBlur1,
+        GaussianBlurHorizontal,
+        GaussianBlurHorizontal1,
+        GaussianBlur2,
+        GaussianBlurHorizontal2
     }
 
     public static class Graphics
@@ -27,7 +35,30 @@ namespace Castles
             fbos.Add(FrameBuffers.waterRefraction, new FBO(new Size(Width, Height),
                 new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0},
                 PixelInternalFormat.Rgba));
-            fbos[FrameBuffers.waterRefraction].Attachments.ForEach(s => Console.WriteLine(s));
+            fbos.Add(FrameBuffers.waterDepth, new FBO(new Size(Width, Height),
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
+                PixelInternalFormat.Rgba));
+            fbos.Add(FrameBuffers.skyBox, new FBO(new Size(Width, Height),
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
+                PixelInternalFormat.Rgba));
+            fbos.Add(FrameBuffers.GaussianBlurHorizontal, new FBO(new Size(Width, Height),
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
+                PixelInternalFormat.Rgba));
+            fbos.Add(FrameBuffers.GaussianBlur1, new FBO(new Size(Width/8, Height/8),
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
+                PixelInternalFormat.Rgba));
+            fbos.Add(FrameBuffers.GaussianBlurHorizontal1, new FBO(new Size(Width / 8, Height / 8),
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
+                PixelInternalFormat.Rgba));
+            fbos.Add(FrameBuffers.GaussianBlur, new FBO(new Size(Width, Height),
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
+                PixelInternalFormat.Rgba));
+            fbos.Add(FrameBuffers.GaussianBlurHorizontal2, new FBO(new Size(Width / 4, Height / 4),
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
+                PixelInternalFormat.Rgba));
+            fbos.Add(FrameBuffers.GaussianBlur2, new FBO(new Size(Width / 4, Height / 4),
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
+                PixelInternalFormat.Rgba));
         }
 
         public static void Dispose()
@@ -65,7 +96,6 @@ namespace Castles
         public Texture(uint id)
         {
             ID = id;
-            textures.Add(this);
         }
         public Texture(string file):this(TextureTarget.Texture2D, file)
         {
@@ -93,8 +123,8 @@ namespace Castles
             if (Gl.IsExtensionSupported(Extension.GL_EXT_texture_filter_anisotropic))
                 Gl.TexParameterf(TextureTarget.Texture2D, TextureParameterName.MaxAnisotropyExt,
                     Math.Min(4f, Gl.GetFloat(GetPName.MaxTextureMaxAnisotropyExt)));
-
         }
+
 
         public static void Dispose() => Gl.DeleteTextures(textures.Count, textures.Select(t => t.ID).ToArray());
         
