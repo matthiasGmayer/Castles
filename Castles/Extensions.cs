@@ -39,6 +39,9 @@ namespace Castles
             m[3].X, m[3].Y, m[3].Z, m[3].W);
         public static Matrix4 ToMatrix4(this Matrix4x4 m) => new Matrix4(new float[] {m.M11,m.M12,m.M13,m.M14,m.M21,m.M22,m.M23,m.M24,m.M31,m.M32,m.M33,m.M34,m.M41,m.M42,m.M43,m.M44});
         public static Vector3 Apply(this Vector3 v, Func<float, float> f) => new Vector3(f(v.X), f(v.Y), f(v.Z));
+        public static Vector2 XY(this Vector3 v) => new Vector2(v.X, v.Y);
+        public static Vector2 XZ(this Vector3 v) => new Vector2(v.X, v.Z);
+        public static Vector2 YZ(this Vector3 v) => new Vector2(v.Y, v.Z);
     }
     public static class IEnumerableExtensions
     {
