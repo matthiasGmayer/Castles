@@ -9,30 +9,56 @@ namespace Castles
 {
     public static class Tools
     {
-        public static bool isLineInCylinder(Vector3 linePoint1, Vector3 linePoint2, Vector3 cylinderPoint, float radius, float height)
+        public static bool isLineInCylinder(Vector3 linePoint1, Vector3 linePoint2, Vector3 cylinderPoint, double radius, double height)
         {
             Vector2 linePointA = linePoint1.XZ();
             Vector2 linePointB = linePoint2.XZ();
             Vector2 cylinderPoint2D = cylinderPoint.XZ();
             Vector2 orthogonalPoint = GetOrthogonalPoint(linePointA, linePointB, cylinderPoint2D);
-            float x = (orthogonalPoint - cylinderPoint2D).Length();
+            double x = (orthogonalPoint - cylinderPoint2D).Length();
             if(x > radius)
             {
                 return false;
             }
             if(x == radius)
             {
-                Vector2 Point = GetIntersectionPoint(linePointA, linePointB, orthogonalPoint, orthogonalPoint, out bool isIntersecting);
-                if()
-                for(int i = 0; i < 5; i++)
+                if (linePoint1.Y > linePoint2.Y)
                 {
-                    linePoints.add(new Vector3())
+                    Vector3 temp = linePoint1;
+                    linePoint1 = linePoint2;
+                    linePoint2 = temp;
+
+                    Vector2 temp1 = linePointA;
+                    linePointA = linePointB;
+                    linePointB = temp1;
                 }
+                double n = (linePointA - linePointB).Length();
+                double b = (linePointA - orthogonalPoint).Length();
+                double relation = b / n;
+                double yDifference = linePoint1.Y - linePoint2.Y;
+                double yOfPoint = linePoint1.Y + (yDifference * relation);
+                if(yOfPoint < cylinderPoint.Y && yOfPoint > cylinderPoint.Y + height)
+                {
+                    return true;
+                }
+                return false;
             }
             else
             {
-                float f = 2 * (float)Math.Sqrt((radius * radius) - (x * x));
-                Vector
+                if (linePointA.X > linePointB.X)
+                {
+                    Vector2 temp = linePointA;
+                    linePointA = linePointB;
+                    linePointB = temp;
+                }
+                double pitch1 = (linePointB.Y - linePointA.Y) / (linePointB.X - linePointA.X);
+                double f = 2 * Math.Sqrt((radius * radius) - (x * x));
+                Vector2 corner1 = new Vector2(
+                Vector2 corner2 = new Vector2(corner1.X, corner1.Y + (float)height);
+                Vector2 corner3 = new Vector2(corner1.X + (float)f, corner1.Y + (float)height);
+                Vector2 corner4 = new Vector2(corner1.X + (float)f, corner1.Y);
+                Vector2 linePointC = linePoint1.
+                if(isIntersecting(linePointC,linePointD,corner1,corner2))
             }
 
 
@@ -113,6 +139,70 @@ namespace Castles
             Vector2 v = GetIntersectionPoint(new Vector2(x1, x2), new Vector2(x3, x4), new Vector2(x5, x6), new Vector2(x7, x8), out bool b);
             isIntersecting = b;
             return v;
+        }
+        public static bool isIntersecting(Vector2 point1, Vector2 point2, Vector2 point3, Vector2 point4)
+        {
+            Vector2 intersection;
+
+            if (point1.X > point2.X)
+            {
+                Vector2 temp = point1;
+                point1 = point2;
+                point2 = temp;
+            }
+            if (point3.X > point4.X)
+            {
+                Vector2 temp = point3;
+                point3 = point4;
+                point4 = temp;
+            }
+            if (point1.X == point2.X && point3.Y == point4.Y)
+            {
+                intersection = new Vector2(point1.X, point3.Y);
+            }
+            else if (point3.X == point4.X && point1.Y == point2.Y)
+            {
+                intersection = new Vector2(point3.X, point1.Y);
+            }
+            else if (point1.X == point2.X)
+            {
+                double pitch = (point4.Y - point3.Y) / (point4.X - point3.X);
+                double b = point3.Y - pitch * point3.X;
+                intersection = new Vector2((float)point1.X, (float)(pitch * point1.X + b));
+            }
+            else if (point3.X == point4.X)
+            {
+                double pitch = (point2.Y - point1.Y) / (point2.X - point1.X);
+                double b = point1.Y - pitch * point1.X;
+                intersection = new Vector2((float)point3.X, (float)(pitch * point3.X + b));
+
+            }
+            else if (point1.Y == point2.Y)
+            {
+                double pitch = (point4.Y - point3.Y) / (point4.X - point3.X);
+                double b = point3.Y - pitch * point3.X;
+                intersection = new Vector2((float)((point1.Y - b) / pitch), (float)point1.Y);
+            }
+            else if (point3.Y == point4.Y)
+            {
+                double pitch = (point2.Y - point1.Y) / (point2.X - point1.X);
+                double b = point1.Y - pitch * point1.X;
+                intersection = new Vector2((float)((point3.Y - b) / pitch), (float)point3.Y);
+
+            }
+            else
+            {
+                double pitch1 = (point2.Y - point1.Y) / (point2.X - point1.X);
+                double b1 = point1.Y - pitch1 * point1.X;
+                double pitch2 = (point4.Y - point3.Y) / (point4.X - point3.X);
+                double b2 = point3.Y - pitch2 * point3.X;
+                double x = (b2 - b1) / (pitch1 - pitch2);
+                intersection = new Vector2((float)x, (float)(pitch1 * x + b1));
+            }
+
+            bool isIntersecting = (intersection.X >= point1.X && intersection.X <= point2.X && intersection.X >= point3.X && intersection.X <= point4.X);
+
+            return isIntersecting;
         }
         public static Vector2 GetOrthogonalPoint(Vector2 linePoint1, Vector2 linePoint2, Vector2 point)
         {
