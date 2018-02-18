@@ -9,34 +9,34 @@ namespace Castles
         private static List<Model> models = new List<Model>();
         public float Reflectivity { get; set; }
         public float ShineDamper { get; set; }
-        public bool HasNormalMapping => normalMap != null;
-        public bool HasSpecularMapping => specularMap != null;
+        public bool HasNormalMapping => Textures.Normal != null;
+        public bool HasSpecularMapping => Textures.Specular != null;
 
         public VAO Vao { get; }
-        private Texture texture, normalMap, specularMap;
+        private TexturePack Textures { get; }
 
         public ShaderProgram Program { get { return Vao.Program; } }
 
 
-        public Model(VAO vao, Texture texture, Texture normalMap = null, Texture specularMap = null)
+        public Model(VAO vao, TexturePack textures)
         {
-            this.Vao = vao;
-            this.texture = texture;
-            this.normalMap = normalMap;
-            this.specularMap = specularMap;
+            Vao = vao;
+            Textures = textures;
             Reflectivity = 1f;
             ShineDamper = 100f;
             models.Add(this);
         }
+        public Model(VAO vao, Texture diffuse) : this(vao, new TexturePack(diffuse))
+        {
+        }
+
+        public Model(VAO vao) : this(vao, (TexturePack)null)
+        {
+        }
 
         public virtual void Bind()
         {
-            if (texture != null)
-                Graphics.Bind(texture);
-            if (normalMap != null)
-                Graphics.Bind(normalMap, 1);
-            if (specularMap != null)
-                Graphics.Bind(specularMap, 2);
+            Graphics.Bind(Textures);
             Gl.BindVertexArray(Vao.ID);
         }
 

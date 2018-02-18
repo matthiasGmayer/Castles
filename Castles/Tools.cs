@@ -51,6 +51,7 @@ namespace Castles
                     linePointA = linePointB;
                     linePointB = temp;
                 }
+                /*
                 double pitch1 = (linePointB.Y - linePointA.Y) / (linePointB.X - linePointA.X);
                 double f = 2 * Math.Sqrt((radius * radius) - (x * x));
                 Vector2 corner1 = new Vector2(
@@ -59,6 +60,8 @@ namespace Castles
                 Vector2 corner4 = new Vector2(corner1.X + (float)f, corner1.Y);
                 Vector2 linePointC = linePoint1.
                 if(isIntersecting(linePointC,linePointD,corner1,corner2))
+                */
+                return false;
             }
 
 

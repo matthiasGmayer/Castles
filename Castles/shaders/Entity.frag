@@ -20,7 +20,7 @@ uniform float shineDamper;
 layout(binding = 0)uniform sampler2D tex;
 layout(binding = 1)uniform sampler2D normalMap;
 layout(binding = 2)uniform sampler2D specularMap;
-layout(binding = 3)uniform sampler2D skyTex;
+layout(binding = 6)uniform sampler2D skyTex;
 uniform bool normalMapping;
 uniform bool specularMapping;
 

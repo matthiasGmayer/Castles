@@ -15,7 +15,7 @@ namespace Castles
         ShaderProgram entityShader = Shaders.GetShader("Entity");
         ShaderProgram blurShader = Shaders.GetShader("Gaussian");
         ShaderProgram guiShader = Shaders.GetShader("GUI");
-        Texture skyTexture = new Texture(Graphics.fbos[FrameBuffers.skyBox].TextureID[0]);
+        public static Texture skyTexture = new Texture(Graphics.fbos[FrameBuffers.skyBox].TextureID[0]);
         Water water;
         PointLight p;
         public Game()
@@ -242,16 +242,9 @@ namespace Castles
 
         private void RenderTerrain()
         {
-            Terrain.terrainShader.Use();
-            Graphics.Bind(Terrain.grassTexture);
-            Graphics.Bind(Terrain.stoneTexture, 1);
-            Graphics.Bind(skyTexture, 2);
+            Terrain.Bind();
             foreach (Terrain t in gameObjects.Where(o => o is Terrain))
             {
-                t.Vao.Program.Use();
-                t.Render();
-                Gl.UseProgram(0);
-                Console.Write("hi");
                 t.Vao.BindAttributes(Terrain.terrainShader);
                 Terrain.terrainShader["transformation_matrix"]?.SetValue(t.GetTransformationMatrix());
                 Gl.DrawElements(BeginMode.Triangles, t.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
@@ -263,7 +256,7 @@ namespace Castles
         {
             foreach (var r in renderMap)
             {
-                Graphics.Bind(skyTexture, 3);
+                Graphics.Bind(skyTexture, 6);
                 r.Key.Bind();
                 foreach (IRenderable rend in r.Value.Where(o => o is IRenderable))
                 {

@@ -12,9 +12,11 @@ namespace Castles
     {
         public static readonly string defaultResources = "..\\..\\Resources\\";
         public static readonly string defaultObj = defaultResources + "Models\\";
-        public static readonly string defaultTex = defaultResources + "Textures\\";
+        public static readonly string defaultDiffuse = defaultResources + "Textures\\";
         public static readonly string defaultNormal = defaultResources + "NormalMaps\\";
         public static readonly string defaultSpecular = defaultResources + "SpecularMaps\\";
+        public static readonly string defaultDisplacement = defaultResources + "Displacement\\";
+        public static readonly string defaultOcclusion = defaultResources + "Occlusion\\";
         public static readonly string defaultSpec = defaultResources + "Specs\\";
 
 
@@ -23,11 +25,24 @@ namespace Castles
 
         private static Func<string, string> dictionaryFunction = s => s;
 
+
+        public static TexturePack LoadTextures(string file)
+        {
+            file = file.Replace("*!", "");
+            return new TexturePack(
+                LoadTexture("!" + file),
+                LoadTexture("n!" + file),
+                LoadTexture("s!" + file),
+                LoadTexture("d!" + file),
+                LoadTexture("o!" + file));
+        }
         public static Texture LoadTexture(string file)
         {
+            file = file.Replace("d!", defaultDisplacement);
+            file = file.Replace("o!", defaultOcclusion);
             file = file.Replace("n!", defaultNormal);
             file = file.Replace("s!", defaultSpecular);
-            file = file.Replace("!", defaultTex);
+            file = file.Replace("!", defaultDiffuse);
             if (!Path.HasExtension(file))
             {
                 if (File.Exists(file + ".png"))
@@ -45,6 +60,8 @@ namespace Castles
                     return null;
 
                 textureMap.Add(name, t = new Texture(file));
+                
+
             }
             else
                 t = textureMap[name];
@@ -56,7 +73,7 @@ namespace Castles
         {
             file = file.Replace("n!", defaultNormal);
             file = file.Replace("s!", defaultSpecular);
-            file = file.Replace("!", defaultTex);
+            file = file.Replace("!", defaultDiffuse);
 
 
             string name = dictionaryFunction(file);
@@ -169,7 +186,7 @@ namespace Castles
 
 
 
-            Model m = new Model(new VAO(program, vertices, normals, tangent, texture, elements), LoadTexture("!" + name), LoadTexture("n!" + name), LoadTexture("s!" + name));
+            Model m = new Model(new VAO(program, vertices, normals, tangent, texture, elements), LoadTextures(name));
             modelMap.Add(save, m);
 
             //specs

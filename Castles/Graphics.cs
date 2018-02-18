@@ -29,11 +29,11 @@ namespace Castles
 
         static Graphics()
         {
-            fbos.Add(FrameBuffers.waterReflection, new FBO(new Size(Width,Height), 
-                new FramebufferAttachment[] {FramebufferAttachment.ColorAttachment0},
+            fbos.Add(FrameBuffers.waterReflection, new FBO(new Size(Width, Height),
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
                 PixelInternalFormat.Rgba));
             fbos.Add(FrameBuffers.waterRefraction, new FBO(new Size(Width, Height),
-                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0},
+                new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
                 PixelInternalFormat.Rgba));
             fbos.Add(FrameBuffers.waterDepth, new FBO(new Size(Width, Height),
                 new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
@@ -44,7 +44,7 @@ namespace Castles
             fbos.Add(FrameBuffers.GaussianBlurHorizontal, new FBO(new Size(Width, Height),
                 new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
                 PixelInternalFormat.Rgba));
-            fbos.Add(FrameBuffers.GaussianBlur1, new FBO(new Size(Width/8, Height/8),
+            fbos.Add(FrameBuffers.GaussianBlur1, new FBO(new Size(Width / 8, Height / 8),
                 new FramebufferAttachment[] { FramebufferAttachment.ColorAttachment0 },
                 PixelInternalFormat.Rgba));
             fbos.Add(FrameBuffers.GaussianBlurHorizontal1, new FBO(new Size(Width / 8, Height / 8),
@@ -61,6 +61,7 @@ namespace Castles
                 PixelInternalFormat.Rgba));
         }
 
+
         public static void Dispose()
         {
             foreach (var r in fbos)
@@ -71,11 +72,23 @@ namespace Castles
         public static int Height => App.app.Height;
         public static void Bind(Texture t, int textureUnit = 0, TextureTarget tr = TextureTarget.Texture2D)
         {
+            if (t == null)
+                return;
             Gl.ActiveTexture(textureUnit);
             Gl.BindTexture(tr, t.ID);
         }
         public static void Bind(Texture t, TextureTarget tr) => Bind(t, 0, tr);
+        public static void Bind(TexturePack p, int a, int b, int c, int d, int e)
+        {
+            Bind(p.Diffuse, a);
+            Bind(p.Normal, b);
+            Bind(p.Specular, c);
+            Bind(p.Displacement, d);
+            Bind(p.Occlusion, e);
+        }
 
+        public static void Bind(TexturePack p, int offset) => Bind(p, offset++, offset++, offset++, offset++, offset++);
+        public static void Bind(TexturePack p) => Bind(p, 0);
 
 
     }
@@ -87,7 +100,6 @@ namespace Castles
         public int Width { get; }
         public int Height { get; }
 
-
         public Texture()
         {
             ID = Gl.GenTexture();
@@ -97,7 +109,7 @@ namespace Castles
         {
             ID = id;
         }
-        public Texture(string file):this(TextureTarget.Texture2D, file)
+        public Texture(string file) : this(TextureTarget.Texture2D, file)
         {
         }
         public Texture(TextureTarget t, string file) : this()
@@ -127,7 +139,43 @@ namespace Castles
 
 
         public static void Dispose() => Gl.DeleteTextures(textures.Count, textures.Select(t => t.ID).ToArray());
-        
+    }
+    public class TexturePack {
+        public Texture Diffuse { get; }
+        public Texture Normal { get; }
+        public Texture Specular { get; }
+        public Texture Displacement { get; }
+        public Texture Occlusion { get; }
 
+        public TexturePack(Texture diffuse, Texture normal = null, Texture specular = null, Texture displacement = null, Texture occlusion = null)
+        {
+            Diffuse = diffuse;
+            Normal = normal;
+            Specular = specular;
+            Displacement = displacement;
+            Occlusion = occlusion;
+        }
+
+        public bool HasDiffuse() => Diffuse != null;
+        public bool HasNormal() => Normal != null;
+        public bool HasSpecular() => Specular != null;
+        public bool HasDisplacement() => Displacement != null;
+        public bool HasOcclusion() => Occlusion != null;
+
+        public void LoadBoolsToShader(ShaderProgram p, string prefix)
+        {
+            LoadBoolToShader(p, prefix, "hasDiffuse", HasDiffuse());
+            LoadBoolToShader(p, prefix, "HasNormal", HasNormal());
+            LoadBoolToShader(p, prefix, "HasSpecular", HasSpecular());
+            LoadBoolToShader(p, prefix, "HasDisplacement", HasDisplacement());
+            LoadBoolToShader(p, prefix, "HasOcclusion", HasOcclusion());
+        }
+        private void LoadBoolToShader(ShaderProgram p , string prefix, string name, bool value)
+        {
+            if (prefix == null || prefix.Equals(""))
+                p[name]?.SetValue(value);
+            else
+                p[prefix + name.Substring(0, 1).ToUpper() + name.Substring(1)].SetValue(value);
+        }
     }
 }

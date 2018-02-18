@@ -10,8 +10,8 @@ namespace Castles
 {
     class Terrain
     {
-        public static Texture stoneTexture = Loader.LoadTexture("!Stone.jpg");
-        public static Texture grassTexture = Loader.LoadTexture("!Grass.jpg");
+        public static TexturePack stone = Loader.LoadTextures("Stone");
+        public static TexturePack grass = Loader.LoadTextures("Grass");
         public static Dictionary<(int X, int Z), Terrain> terrainMap = new Dictionary<(int, int), Terrain>();
         public (int X, int Z) Position { get; }
         public VAO Vao { get; }
@@ -28,6 +28,7 @@ namespace Castles
             terrainMap.Add(position, this);
             List<Vector3> vertices = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
+            List<Vector3> tangents = new List<Vector3>();
             List<Vector2> uv = new List<Vector2>();
             List<int> elements = new List<int>();
 
@@ -46,7 +47,7 @@ namespace Castles
             {
                 for (int z = 0; z <= length; z++)
                 {
-                    normals.Add(CalculateNormal(x, z));
+                    CalculateNormalAndTangent(x, z, normals, tangents);
                 }
             }
 
@@ -63,8 +64,7 @@ namespace Castles
                     elements.Add((x + 1) * len + z);
                 }
             }
-
-            Vao = new VAO(terrainShader, new VBO<Vector3>(vertices.ToArray()), new VBO<Vector3>(normals.ToArray()), new VBO<Vector2>(uv.ToArray()), new VBO<int>(elements.ToArray(), BufferTarget.ElementArrayBuffer));
+            Vao = new VAO(terrainShader, new VBO<Vector3>(vertices.ToArray()), new VBO<Vector3>(normals.ToArray()),new VBO<Vector2>(uv.ToArray()), new VBO<int>(elements.ToArray(), BufferTarget.ElementArrayBuffer));
         }
 
         public static float GetHeight(Vector2 v) => GetHeight(v.X, v.Y);
@@ -82,24 +82,13 @@ namespace Castles
                 heightMap.Add((x, z), heightFunction(x * spacing, z * spacing));
             return heightMap[(x, z)];
         }
-        private Vector3 CalculateNormal(int x, int z)
+        private void CalculateNormalAndTangent(int x, int z, List<Vector3> normals, List<Vector3> tangents)
         {
-
-            //float[] heights = new float[] { CalculateHeight(x - 1, z), CalculateHeight(x + 1, z), CalculateHeight(x, z - 1) , CalculateHeight(x, z + 1) };
-            //Vector3 normal = new Vector3(heights[0] - heights[1], 2 , heights[2] - heights[3]);
-
-
-            Vector3 v1 = new Vector3((x - 1) * spacing, CalculateHeight(x - 1, z), z) - new Vector3((x + 1) * spacing, CalculateHeight(x + 1, z), z);
-            Vector3 v2 = new Vector3(x, CalculateHeight(x, z - 1), (z - 1) * spacing) - new Vector3(x, CalculateHeight(x, z + 1), (z + 1) * spacing);
-            Vector3 normal = Vector3.Cross(v2, v1);
-            //Vector3 u = new Vector3(spacing, 0.0f, CalculateHeight(x + 1, z) - CalculateHeight(x - 1, z));
-            //Vector3 v = new Vector3(0.0f, spacing, CalculateHeight(x, z + 1) - CalculateHeight(x, z - 1));
-            //Vector3 normal = Vector3.Cross(u, v);
-            normal = normal.Normalize();
-            //if (normal.Y < 0)
-            //    normal = -normal;
-
-            return normal;
+            Vector3 tangent = new Vector3((x - 1) * spacing, CalculateHeight(x - 1, z), z) - new Vector3((x + 1) * spacing, CalculateHeight(x + 1, z), z);
+            Vector3 bitangent = new Vector3(x, CalculateHeight(x, z - 1), (z - 1) * spacing) - new Vector3(x, CalculateHeight(x, z + 1), (z + 1) * spacing);
+            Vector3 normal = Vector3.Cross(bitangent, tangent);
+            normals.Add(normal.Normalize());
+            tangents.Add(tangent.Normalize());
         }
 
 
@@ -234,6 +223,14 @@ namespace Castles
 
 
 
+        }
+
+        public static void Bind()
+        {
+            terrainShader.Use();
+            Graphics.Bind(grass);
+            Graphics.Bind(stone, 5);
+            Graphics.Bind(Game.skyTexture, 10);
         }
     }
 }

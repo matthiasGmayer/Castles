@@ -33,7 +33,7 @@ namespace Castles
             new VBO<int>(new int[] 
             {
                 0,1,2,3,2,1
-            }, BufferTarget.ElementArrayBuffer, BufferUsageHint.StaticRead)), null);
+            }, BufferTarget.ElementArrayBuffer, BufferUsageHint.StaticRead)));
         public Vector3 Position { get; set; }
         public Vector2 Scale { get; set; }
         public float WaveSize { get; set; }
