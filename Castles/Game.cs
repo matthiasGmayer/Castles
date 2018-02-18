@@ -248,6 +248,10 @@ namespace Castles
             Graphics.Bind(skyTexture, 2);
             foreach (Terrain t in gameObjects.Where(o => o is Terrain))
             {
+                t.Vao.Program.Use();
+                t.Render();
+                Gl.UseProgram(0);
+                Console.Write("hi");
                 t.Vao.BindAttributes(Terrain.terrainShader);
                 Terrain.terrainShader["transformation_matrix"]?.SetValue(t.GetTransformationMatrix());
                 Gl.DrawElements(BeginMode.Triangles, t.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
