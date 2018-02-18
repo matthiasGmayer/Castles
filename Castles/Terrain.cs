@@ -19,15 +19,6 @@ namespace Castles
         public static int spacing = 10;
         public static ShaderProgram terrainShader = Shaders.GetShader("Terrain");
         public static int Width { get { return length * spacing; } }
-        
-
-        static Terrain()
-        {
-            terrainShader.Use();
-            terrainShader.SetTexture("grassTex", 0);
-            terrainShader.SetTexture("stoneTex", 1);
-            terrainShader.SetTexture("skyTex", 2);
-        }
 
 
         public Terrain(int _x, int _y)
@@ -75,6 +66,9 @@ namespace Castles
 
             Vao = new VAO(terrainShader, new VBO<Vector3>(vertices.ToArray()), new VBO<Vector3>(normals.ToArray()), new VBO<Vector2>(uv.ToArray()), new VBO<int>(elements.ToArray(), BufferTarget.ElementArrayBuffer));
         }
+
+        public static float GetHeight(Vector2 v) => GetHeight(v.X, v.Y);
+
         Random random = new Random();
 
         private static Dictionary<(int, int), float> heightMap = new Dictionary<(int, int), float>();

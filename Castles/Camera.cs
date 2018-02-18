@@ -79,7 +79,7 @@ namespace Castles
         public void Update(float delta)
         {
             float factor = (float)Math.Pow(0.01f, delta);
-            targetLook = Entity.Position - ((Entity.Position - targetLook) * new Vector3(factor));
+            targetLook = Entity.Position - ((Entity.Position - targetLook) * factor);
             distance = targetDistance - ((targetDistance - distance) * factor);
             yaw = targetYaw - ((targetYaw - yaw) * factor);
             pitch = targetPitch - ((targetPitch - pitch) * factor);

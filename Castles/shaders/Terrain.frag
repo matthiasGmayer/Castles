@@ -16,9 +16,9 @@ uniform int pointLightNumber;
 uniform int dirLightNumber;
 //uniform float reflectivity;
 //uniform float shineDamper;
-uniform sampler2D grassTex;
-uniform sampler2D stoneTex;
-uniform sampler2D skyTex;
+layout(binding = 0)uniform sampler2D grassTex;
+layout(binding = 1)uniform sampler2D stoneTex;
+layout(binding = 2)uniform sampler2D skyTex;
 
 void main(void){
 

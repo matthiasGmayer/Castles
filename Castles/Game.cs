@@ -15,6 +15,7 @@ namespace Castles
         ShaderProgram entityShader = Shaders.GetShader("Entity");
         ShaderProgram blurShader = Shaders.GetShader("Gaussian");
         ShaderProgram guiShader = Shaders.GetShader("GUI");
+        Texture skyTexture = new Texture(Graphics.fbos[FrameBuffers.skyBox].TextureID[0]);
         Water water;
         PointLight p;
         public Game()
@@ -22,11 +23,12 @@ namespace Castles
             water = Create(new Water(new Vector3(0, 0, 0), new Vector2(10000, 10000), 1, 0.02f));
             Create(new Skybox("!Sky2"));
 
-            //p = Create(new PointLight(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 0.001f, 0.0002f)));
-            Create(new PointLight(new Vector3(), new Vector3(1, 0, 0), new Vector3(1, 0.001f, 0.0002f)));
+            //p = Create(new PointLight(new Vector3(), new Vector3(1, 1, 1), new Vector3(1, 0, 0)));
+            //Create(new PointLight(new Vector3(0,1000,0), new Vector3(1, 1, 1), new Vector3(1, 0, 0)));
+            //Create(new PointLight(new Vector3(), new Vector3(1, 0, 0), new Vector3(1, 0.001f, 0.0002f)));
             //Create(new PointLight(new Vector3(), new Vector3(1, 0, 0), new Vector3(1, 0.001f, 0.0002f)));
             Create(new DirectionalLight(new Vector3(10, -10, 0), new Vector3(1, 1, 1)));
-            player = Create(new Entity(Loader.LoadModel("!Dragon", entityShader)));
+            player = Create(new Entity(Loader.LoadModel("!Lantern", entityShader)));
 
 
             c = Create(new EntityCamera(player));
@@ -49,13 +51,13 @@ namespace Castles
             time %= 10000;
             ManageObjects();
             ManageTerrain();
-            float speed = delta * 100f;
-            player.Position = new Vector3(player.Position.X, Terrain.GetHeight(player.Position.X, player.Position.Z) + 30, player.Position.Z);
-            player.Position += new Vector3(0, y, 0);
-            water.Position = new Vector3(player.Position.X, water.Position.Y, player.Position.Z);
+            float speed = delta * 500f;
+            player.Position = player.Position.WithY(y + Terrain.GetHeight(player.Position.XZ()));
+            player.Rotation += new Vector3(0, delta, 0);
+            water.Position = player.Position.WithY(water.Position.Y);
             Vector3 v = new Vector3();
 
-            //p.Position = player.Position;
+            //p.Position = player.Position + new Vector3(0,10,0);
 
             if (Actions.IsPressed(OpenTK.Input.Key.S))
                 v += new Vector3(1, 0, 0);
@@ -168,6 +170,8 @@ namespace Castles
             }
         }
 
+
+
         /// <summary>
         /// The Blurred Texture will be in the Gaussian Blur Fbo
         ///
@@ -194,13 +198,13 @@ namespace Castles
             blurShader["targetWidth"].SetValue(f.Size.Width);
             blurShader["targetHeight"].SetValue(f.Size.Height);
             tex.Model.Bind();
-            blurShader["vertical"].SetValue(1);
+            blurShader["vertical"].SetValue(true);
             Gl.DrawElements(BeginMode.Triangles, tex.Model.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
             f.Disable();
             tex = new GUITexture(new Texture(f.TextureID[0]), new Vector2(-1), new Vector2(2));
             f2.Enable();
             blurShader.Use();
-            blurShader["vertical"].SetValue(0);
+            blurShader["vertical"].SetValue(false);
             tex.Model.Bind();
             Gl.DrawElements(BeginMode.Triangles, tex.Model.Vao.VertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
             f2.Disable();
@@ -241,7 +245,7 @@ namespace Castles
             Terrain.terrainShader.Use();
             Graphics.Bind(Terrain.grassTexture);
             Graphics.Bind(Terrain.stoneTexture, 1);
-            Graphics.Bind(new Texture(Graphics.fbos[FrameBuffers.skyBox].TextureID[0]), 2);
+            Graphics.Bind(skyTexture, 2);
             foreach (Terrain t in gameObjects.Where(o => o is Terrain))
             {
                 t.Vao.BindAttributes(Terrain.terrainShader);
@@ -255,12 +259,15 @@ namespace Castles
         {
             foreach (var r in renderMap)
             {
+                Graphics.Bind(skyTexture, 3);
                 r.Key.Bind();
                 foreach (IRenderable rend in r.Value.Where(o => o is IRenderable))
                 {
                     if (!p(rend))
                         continue;
                     r.Key.Program.Use();
+                    r.Key.Program["normalMapping"]?.SetValue(r.Key.HasNormalMapping);
+                    r.Key.Program["specularMapping"]?.SetValue(r.Key.HasSpecularMapping);
                     if (rend is ITransformable t)
                         r.Key.Program["transformation_matrix"]?.SetValue(t.GetTransformationMatrix());
                     else
@@ -291,7 +298,7 @@ namespace Castles
             }
             program["pointLightNumber"].SetValue(i);
             program["dirLightNumber"].SetValue(j);
-            Gl.UseProgram(0);
+            //Gl.UseProgram(0);
         }
 
 

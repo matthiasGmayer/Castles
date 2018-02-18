@@ -27,7 +27,6 @@ namespace Castles
         public override void SetUniforms(int i, ShaderProgram program)
         {
             program.Use();
-
             Gl.ProgramUniform3fv(program.ProgramID, Gl.GetUniformLocation(program.ProgramID, "pointLight["+i+"]"), 3, Position.ToFloat());
             Gl.ProgramUniform3fv(program.ProgramID, Gl.GetUniformLocation(program.ProgramID, "pointLightColor[" + i + "]"), 3, Color.ToFloat());
             Gl.ProgramUniform3fv(program.ProgramID, Gl.GetUniformLocation(program.ProgramID, "attenuation[" + i + "]"), 3, Attenuation.ToFloat());

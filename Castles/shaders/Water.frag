@@ -7,12 +7,12 @@ in vec3 toCamera;
 in vec3 toLight[MAXLIGHTS];
 in vec4 positionToCamera;
 
-uniform sampler2D reflectionTex;
-uniform sampler2D refractionTex;
-uniform sampler2D dudvTex;
-uniform sampler2D normalTex;
-uniform sampler2D depthTex;
-uniform sampler2D skyTex;
+layout(binding = 0)uniform sampler2D refractionTex;
+layout(binding = 1)uniform sampler2D reflectionTex;
+layout(binding = 2)uniform sampler2D dudvTex;
+layout(binding = 3)uniform sampler2D normalTex;
+layout(binding = 4)uniform sampler2D depthTex;
+layout(binding = 5)uniform sampler2D skyTex;
 uniform float waveStrength;
 uniform float time;
 uniform float near;
@@ -33,7 +33,7 @@ void main(void){
 
 	float floorDistance = 2.0 * near * far / (far + near - (2.0 * texture(depthTex, coords).x - 1.0) * (far - near));
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
-	float waterDepth = (floorDistance - waterDistance) * unitToCamera.y;
+	float waterDepth = (floorDistance - waterDistance);
 	float waterDepthFactor = clamp(waterDepth/15,0,1);
 
 	float t = fract(time * 30);

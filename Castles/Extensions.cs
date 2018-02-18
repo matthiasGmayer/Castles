@@ -42,6 +42,9 @@ namespace Castles
         public static Vector2 XY(this Vector3 v) => new Vector2(v.X, v.Y);
         public static Vector2 XZ(this Vector3 v) => new Vector2(v.X, v.Z);
         public static Vector2 YZ(this Vector3 v) => new Vector2(v.Y, v.Z);
+        public static Vector3 WithX(this Vector3 v, float x) => new Vector3(x, v.Y, v.Z);
+        public static Vector3 WithY(this Vector3 v, float y) => new Vector3(v.X, y, v.Z);
+        public static Vector3 WithZ(this Vector3 v, float z) => new Vector3(v.X, v.Y, z);
     }
     public static class IEnumerableExtensions
     {
@@ -50,10 +53,5 @@ namespace Castles
             foreach (TSource t in e)
                 a(t);
         }
-    }
-    public static class ShaderExtensions
-    {
-        public static void SetTexture(this ShaderProgram p, string s, int i) => Gl.Uniform1i(Gl.GetUniformLocation(p.ProgramID, s), i);
-
     }
 }
