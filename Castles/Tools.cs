@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using OpenGL;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,6 +12,12 @@ namespace Castles
     {
         public static bool isLineInCylinder(Vector3 linePoint1, Vector3 linePoint2, Vector3 cylinderPoint, double radius, double height)
         {
+            Vector2 linePointAv = linePoint1.XZ();
+            Vector2 linePointBv = linePoint2.XZ();
+            Matrix4 m = Matrix4.CreateRotationY(GetAngle(linePointAv, linePointBv));
+            linePoint1 = m * linePoint1;
+            linePoint2 = m * linePoint2;
+            cylinderPoint = m * cylinderPoint;
             Vector2 linePointA = linePoint1.XZ();
             Vector2 linePointB = linePoint2.XZ();
             Vector2 cylinderPoint2D = cylinderPoint.XZ();
@@ -51,18 +58,21 @@ namespace Castles
                     linePointA = linePointB;
                     linePointB = temp;
                 }
-                /*
                 double pitch1 = (linePointB.Y - linePointA.Y) / (linePointB.X - linePointA.X);
                 double f = 2 * Math.Sqrt((radius * radius) - (x * x));
-                Vector2 corner1 = new Vector2(
+                Vector2 corner1 = new Vector2((float)-f/2, 0);
                 Vector2 corner2 = new Vector2(corner1.X, corner1.Y + (float)height);
                 Vector2 corner3 = new Vector2(corner1.X + (float)f, corner1.Y + (float)height);
                 Vector2 corner4 = new Vector2(corner1.X + (float)f, corner1.Y);
-                Vector2 linePointC = linePoint1.
-                if(isIntersecting(linePointC,linePointD,corner1,corner2))
-                */
-                return false;
+                // So wäre Linie in Relation zu Kreismittelpunkt angelegt, dieser entspricht nicht dem des Vierecks
+                Vector2 linePointC = new Vector2(cylinderPoint.X - linePoint1.X, cylinderPoint.Y - linePoint1.Y);
+                Vector2 linePointD = new Vector2(cylinderPoint.X - linePoint2.X, cylinderPoint.Y - linePoint2.Y);
+                if (isIntersecting(linePointC,linePointD,corner1,corner2)||isIntersecting(linePointC,linePointD,corner2,corner3) || isIntersecting(linePointC, linePointD,corner3,corner4) || isIntersecting(linePointC, linePointD, corner4, corner1))
+                {
+                    return true;
+                }
             }
+            return false;
 
 
         }
