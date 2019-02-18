@@ -1,5 +1,5 @@
-# CastlesCode
-This is a GameEngine that uses C# and Giawa's OpenGl Library.  
+# Castles  
+is a GameEngine that uses C# and Giawa's OpenGl Library.  
 Current features include:  
   Entity rendering  
   Terrain generation  
