@@ -6,7 +6,7 @@ Current features include:
   Diffuse mapping  
   Normal mapping  
   Skybox rendering  
-  Fog/Fadeout
+  Fog/Fadeout  
   Water rendering including diffraction and reflection  
 ![Alt text](Pictures/Terrain.png?raw=true "Terrain")
 ![Alt text](Pictures/Entity.png?raw=true "Entities")
