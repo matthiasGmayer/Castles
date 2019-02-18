@@ -8,5 +8,5 @@ Current features include:
   Skybox rendering  
   Fog/Fadeout  
   Water rendering including diffraction and reflection  
-![Alt text](Pictures/Terrain.png?raw=true "Terrain")
-![Alt text](Pictures/Entity.png?raw=true "Entities")
+!(Pictures/Terrain.png?raw=true "Terrain")
+!(Pictures/Entity.png?raw=true "Entities")
