@@ -1,5 +1,6 @@
 # Castles  
-is a GameEngine that uses C# and Giawa's OpenGl Library.  
+Castles is a GameEngine that uses C# and Giawa's OpenGl Library.  
+
 Current features include:  
   Entity rendering  
   Terrain generation  
@@ -8,5 +9,6 @@ Current features include:
   Skybox rendering  
   Fog/Fadeout  
   Water rendering including diffraction and reflection  
+
 ![](Pictures/Terrain.png?raw=true "Terrain")
 ![](Pictures/Entity.png?raw=true "Entities")
