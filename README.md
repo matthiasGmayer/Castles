@@ -1,7 +1,7 @@
 # Castles  
 Castles is a GameEngine that uses C# and Giawa's OpenGl Library.  
 
-## Feature
+## Features
 - Entity rendering  
 - Terrain generation  
 - Diffuse mapping  
